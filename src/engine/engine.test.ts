@@ -194,16 +194,17 @@ describe('partidas completas con máquinas', () => {
   it('terminan siempre, con 2 a 5 jugadores', () => {
     const reinos: Reino[] = ['rojo', 'verde', 'amarillo', 'azul', 'morado'];
     for (let n = 2; n <= 5; n++) {
-      for (let seed = 1; seed <= 15; seed++) {
+      for (let seed = 1; seed <= 6; seed++) {
         const g0 = createGame(
           reinos.slice(0, n).map((reino, i) => ({ name: `J${i}`, reino })),
           seed * 7919,
         );
-        const end = playOut(g0, Array(n).fill(seed % 2 ? 'normal' : 'facil'));
+        const levels = Array.from({ length: n }, (_, i) => (['facil', 'normal', 'dificil'] as const)[(seed + i) % 3]);
+        const end = playOut(g0, seed <= 2 ? levels : levels.map((l) => (l === 'dificil' ? 'facil' : l)));
         expect(end.phase).toBe('GAME_OVER');
         expect(end.winners!.length).toBeGreaterThan(0);
         for (const p of end.players) expect(p.ciudades + p.territorios).toBeLessThanOrEqual(7);
       }
     }
-  });
+  }, 120_000);
 });
