@@ -348,6 +348,25 @@ button.start:hover:not(:disabled) {
   color: #fff3d0;
 }
 
+/* Ordenador: ilustración a la derecha y botones a la izquierda */
+@media (min-width: 701px) {
+  .home {
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: clamp(28px, 6vw, 90px);
+  }
+  .cover {
+    max-height: calc(100vh - 40px);
+  }
+  .menu {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .menu button.start {
+    width: 320px;
+  }
+}
+
 /* ------------------------------------------------------------------ Páginas */
 .page {
   min-height: 100%;
@@ -1769,5 +1788,22 @@ input {
 @media (max-width: 700px) {
   .sum-row {
     grid-template-columns: 52px minmax(0, 1fr) auto;
+  }
+}
+
+/* Ordenador — elección de reino: dos filas (3 + 2) que ocupan casi toda la pantalla */
+@media (min-width: 701px) {
+  /* Elección de reino: dos filas (3 + 2) que ocupan casi toda la pantalla */
+  .setup {
+    --tw: min(30vw, calc(((100vh - 300px) / 2 - 70px) * 88 / 63));
+    gap: 12px;
+  }
+  .tronos {
+    width: calc(3 * var(--tw) + 2 * 22px);
+    max-width: 100%;
+    gap: 14px 22px;
+  }
+  .trono {
+    width: var(--tw);
   }
 }

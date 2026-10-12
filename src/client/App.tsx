@@ -47,9 +47,6 @@ export function App() {
           <button className="start" onClick={() => setScreen('local-setup')}>
             Jugar en este dispositivo
           </button>
-          <button className="link" onClick={() => setScreen('rules')}>
-            Reglas
-          </button>
           {loadLocal() && (
             <button className="link" onClick={() => setScreen('local')}>
               Continuar la partida guardada
