@@ -80,6 +80,30 @@ def main(src, dst):
     f = f.crop((0, 77, 1448, 1002))
     f = f.resize((f.width // 2, f.height // 2), Image.LANCZOS)
     f.save(os.path.join(dst, "marco.webp"), quality=88)
+    # Adornos centrales por separado (se colocan una sola vez, sin estirarse) y marco con bordes lisos
+    W, H = f.size
+    T, B, L, R = 109, 97, 103, 104
+    f.crop((272, 0, 452, T)).save(os.path.join(dst, "orn-arriba.webp"), quality=88)
+    f.crop((272, H - B, 452, H)).save(os.path.join(dst, "orn-abajo.webp"), quality=88)
+    f.crop((0, 135, L, 305)).save(os.path.join(dst, "orn-izq.webp"), quality=88)
+    f.crop((W - R, 135, W, 305)).save(os.path.join(dst, "orn-der.webp"), quality=88)
+    plano = f.copy()
+
+    def tira(seg, largo, horizontal):
+        """Repite un trozo liso del marco hasta cubrir exactamente `largo` píxeles."""
+        out = Image.new("RGBA", (largo, seg.height) if horizontal else (seg.width, largo))
+        paso = seg.width if horizontal else seg.height
+        for k in range(0, largo, paso):
+            out.paste(seg, (k, 0) if horizontal else (0, k))
+        return out
+
+    plano.paste(tira(f.crop((140, 0, 250, T)), W - L - R, True), (L, 0))
+    plano.paste(tira(f.crop((140, H - B, 250, H)), W - L - R, True), (L, H - B))
+    plano.paste(tira(f.crop((0, 120, L, 160)), H - T - B, False), (0, T))
+    plano.paste(tira(f.crop((W - R, 120, W, 160)), H - T - B, False), (W - R, T))
+    # punta del adorno inferior que asoma hacia el centro
+    plano.paste(f.crop((250, H - B - 40, 320, H - B)), (327, H - B - 40))
+    plano.save(os.path.join(dst, "marco-plano.webp"), quality=88)
     print("marco", f.size)
 
 if __name__ == "__main__":

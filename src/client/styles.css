@@ -160,11 +160,29 @@ select {
   border-style: solid;
   border-color: transparent;
   border-width: 39px 37px 35px 37px;
-  border-image: url('/ui/marco.webp') 109 104 97 103 fill / 39px 37px 35px 37px round;
+  border-image: url('/ui/marco-plano.webp') 109 104 97 103 fill / 39px 37px 35px 37px round;
   border-radius: 0;
   background: none;
   box-shadow: none;
   filter: none;
+  position: relative;
+}
+/* Adornos del centro de cada lado: uno solo, a su tamaño, sin estirarse */
+.framed::before,
+.panel::before,
+.summary::before,
+.gameover::before,
+.curtain-box::before,
+.online-choices > div::before {
+  content: '';
+  position: absolute;
+  inset: -39px -37px -35px -37px;
+  pointer-events: none;
+  background:
+    url('/ui/orn-arriba.webp') top center / auto 39px no-repeat,
+    url('/ui/orn-abajo.webp') bottom center / auto 35px no-repeat,
+    url('/ui/orn-izq.webp') left center / 37px auto no-repeat,
+    url('/ui/orn-der.webp') right center / 37px auto no-repeat;
 }
 
 /* Botón redondo de bronce */
