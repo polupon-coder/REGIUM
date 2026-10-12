@@ -1139,6 +1139,15 @@ button.tropa:disabled {
   font-size: 2rem;
   margin: 6px 0 0;
 }
+.notice h2 {
+  font-size: clamp(1.25rem, 6.4vw, 2rem);
+  white-space: nowrap;
+}
+.notice .who {
+  font-size: 0.8rem;
+  line-height: 1.1;
+  text-align: center;
+}
 .notice.good h2 {
   color: var(--gold-soft);
 }
