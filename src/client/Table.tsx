@@ -122,7 +122,6 @@ export function Table({
             img: lugarImg(b.reino, 'territorio', Math.min(7, b.ciudades + b.territorios)),
             imgKind: 'lugar',
             title: 'Nuevo territorio',
-            text: 'Has acertado tu apuesta y tu reino crece.',
           });
         for (let k = 0; k < built; k++)
           add(big, {
@@ -131,7 +130,7 @@ export function Table({
             img: lugarImg(b.reino, 'ciudad', b.ciudades - built + k + 1),
             imgKind: 'lugar',
             title: 'Nueva ciudad',
-            text: `Ya tienes ${b.ciudades - built + k + 1} de 7 ciudades.`,
+            text: `${b.ciudades - built + k + 1} de 7`,
           });
         if (razed > 0)
           add(big, {
@@ -140,7 +139,7 @@ export function Table({
             img: lugarImg(b.reino, 'ciudad', a.ciudades),
             imgKind: 'lugar',
             title: 'Ciudad arrasada',
-            text: `${who} arrasa una de tus ciudades: vuelve a ser territorio.`,
+            text: who,
           });
         if (netT < 0)
           add(big, {
@@ -149,7 +148,7 @@ export function Table({
             img: lugarImg(b.reino, 'territorio', Math.max(1, a.ciudades + a.territorios)),
             imgKind: 'lugar',
             title: 'Territorio conquistado',
-            text: `${who} te arrebata un territorio.`,
+            text: who,
           });
       }
       // Fin de una guerra: resumen y anuncio de la siguiente
@@ -305,8 +304,6 @@ export function Table({
   );
 }
 
-const TROPAS: Record<Reino, string> = { rojo: 'rojas', verde: 'verdes', amarillo: 'amarillas', azul: 'azules', morado: 'moradas' };
-
 /** Anuncio de una guerra: cuántas batallas y en qué reino tiene lugar. */
 function warNotice(g: GameState, name: (s: number) => string): Omit<Notice, 'id'> {
   const r: Reino = g.players[g.emperor].reino;
@@ -318,9 +315,9 @@ function warNotice(g: GameState, name: (s: number) => string): Omit<Notice, 'id'
     title: `Guerra ${g.war + 1}`,
     text: (
       <>
-        {nb} {nb === 1 ? 'batalla' : 'batallas'} en el <b>{REINO_INFO[r].nombre}</b>.
+        {nb} {nb === 1 ? 'batalla' : 'batallas'} · <b>{REINO_INFO[r].nombre}</b>
         <br />
-        {name(g.emperor) === 'Tú' ? 'Eres el Emperador' : `Emperador: ${name(g.emperor)}`} · las tropas {TROPAS[r]} son imperiales.
+        Emperador: {name(g.emperor)}
       </>
     ),
   };
@@ -437,9 +434,7 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
           </button>
         ))}
       </div>
-      <div className="hint">
-        Apostado por los demás: {sum} de {n}.{last && n - sum >= 0 && ` Eres el último: no puedes apostar ${n - sum}.`}
-      </div>
+      {last && n - sum >= 0 && <div className="hint">No puedes apostar {n - sum}.</div>}
     </div>
   );
 }
@@ -456,10 +451,7 @@ function ResolvePanel({ g, act, busy }: { g: GameState; act: (a: Action) => void
         <CoinButton glyph="♜" label="Levantar ciudad" disabled={busy || !o.build} onClick={() => act({ type: 'build' })} big />
         <CoinButton glyph="✓" label={left > 0 ? 'Terminar' : 'Continuar'} disabled={busy} onClick={() => act({ type: 'pass' })} big />
       </div>
-      <div className="hint">
-        {o.destroyCity.length > 0 && 'O toca una ciudad rival para arrasarla (1 victoria). '}
-        {o.destroyTerritory.length > 0 && 'Un territorio rival se conquista con 2 victorias.'}
-      </div>
+      {(o.destroyCity.length > 0 || o.destroyTerritory.length > 0) && <div className="hint">O toca una carta rival para destruirla.</div>}
     </div>
   );
 }

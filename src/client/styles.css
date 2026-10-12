@@ -265,49 +265,59 @@ select {
 .home {
   position: relative;
   min-height: 100%;
-  background-size: cover;
-  background-position: center 20%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.home-shade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #0000 0%, #0000 35%, #0d0a08cc 70%, #0d0a08 100%);
-}
-.home-content {
-  position: relative;
-  text-align: center;
-  padding: 24px 16px 8vh;
-  max-width: 560px;
-}
-.title {
-  font-size: clamp(3.2rem, 12vw, 6.5rem);
-  color: var(--gold);
-  text-shadow: 0 3px 18px #000c;
-  margin: 0;
-}
-.tagline {
-  font-style: italic;
-  color: var(--parch);
-  margin: 0 0 28px;
-}
-.menu {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px 16px 28px;
+  overflow: hidden;
 }
-.menu > button:not(.link) {
-  width: min(320px, 100%);
-  font-size: 1.1rem;
-  padding: 11px 18px;
+/* Fondo: la misma portada, desenfocada y oscura */
+.home-bg {
+  position: absolute;
+  inset: -40px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(24px) brightness(0.35);
 }
-.menu-note {
-  color: var(--muted);
-  font-size: 0.85rem;
-  margin-top: -6px;
+/* La portada completa, con su título */
+.cover {
+  position: relative;
+  display: block;
+  max-height: calc(100vh - 190px);
+  max-width: 100%;
+  width: auto;
+  box-shadow: 0 16px 50px #000;
+}
+.home-content {
+  position: relative;
+}
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 18px;
+}
+
+/* Botones de iniciar: marco simple de bronce */
+button.start {
+  border: 14px solid transparent;
+  border-image: url('/ui/marco-simple.webp') 45 fill / 14px stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  padding: 6px 14px;
+  min-width: 240px;
+  font-family: 'IM Fell English', serif;
+  font-size: 1.2rem;
+  color: var(--gold-soft);
+  filter: drop-shadow(0 4px 10px #000c);
+}
+button.start:hover:not(:disabled) {
+  filter: brightness(1.3) drop-shadow(0 4px 10px #000c);
+  color: #fff3d0;
 }
 
 /* ------------------------------------------------------------------ Páginas */
@@ -1161,6 +1171,21 @@ button.tropa:disabled {
 @media (max-width: 700px) {
   body {
     font-size: 16px;
+  }
+  /* En el móvil, la portada se ve entera */
+  .home {
+    justify-content: flex-start;
+  }
+  .cover {
+    width: 100%;
+    max-height: none;
+  }
+  .menu {
+    flex-direction: column;
+    width: 100%;
+  }
+  .menu button.start {
+    width: 100%;
   }
   .table {
     --card-w: clamp(52px, 18vw, 92px);

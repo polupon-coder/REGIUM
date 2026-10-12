@@ -41,17 +41,17 @@ export function App() {
       </div>
     );
   return (
-    <div className="home" style={{ backgroundImage: `url(${PORTADA})` }}>
-      <div className="home-shade" />
+    <div className="home">
+      <div className="home-bg" style={{ backgroundImage: `url(${PORTADA})` }} />
+      <img className="cover" src={PORTADA} alt="REGIUM" />
       <div className="home-content">
-        <h1 className="title">REGIUM</h1>
-        <p className="tagline">Cinco reinos. Diecinueve guerras. Siete ciudades para reinar sobre todos.</p>
         <div className="menu">
-          <button className="primary" onClick={() => setScreen('online')}>
+          <button className="start" onClick={() => setScreen('online')}>
             Jugar online
           </button>
-          <button onClick={() => setScreen('local-setup')}>Jugar en este dispositivo</button>
-          <span className="menu-note">contra la máquina o por turnos con otras personas</span>
+          <button className="start" onClick={() => setScreen('local-setup')}>
+            Jugar en este dispositivo
+          </button>
           <button className="link" onClick={() => setScreen('rules')}>
             Reglas
           </button>
@@ -154,10 +154,6 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
           ← Volver
         </button>
         <h1>Partida en este dispositivo</h1>
-        <p className="lead">
-          Elige qué reinos entran en guerra (de 2 a 5) y quién los gobierna. Si hay varias personas, la pantalla se tapa al pasar
-          el turno para que nadie vea las cartas de los demás.
-        </p>
         <div className="reinos">
           {REINOS.map((r) => {
             const s = seats[r];
@@ -187,10 +183,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
           })}
         </div>
         <div className="setup-foot">
-          <span>
-            {chosen.length} {chosen.length === 1 ? 'reino' : 'reinos'} · {humans} {humans === 1 ? 'persona' : 'personas'}
-          </span>
-          <button className="primary" disabled={chosen.length < 2 || humans < 1} onClick={start}>
+          <button className="start" disabled={chosen.length < 2 || humans < 1} onClick={start}>
             Empezar la guerra
           </button>
         </div>
@@ -268,12 +261,11 @@ function LocalGame({ onExit }: { onExit: () => void }) {
         <div className="curtain-box">
           <RegenteCard reino={g.players[g.turn].reino} />
           <h2>Turno de {g.players[g.turn].name}</h2>
-          <p>Pasa el dispositivo. Que nadie más mire la pantalla.</p>
-          <button className="primary" onClick={() => setRevealed(g.turn)}>
-            Soy {g.players[g.turn].name}: ver mis cartas
+          <button className="start" onClick={() => setRevealed(g.turn)}>
+            Ver mis cartas
           </button>
           <button className="link" onClick={exit}>
-            Salir (la partida queda guardada)
+            Salir
           </button>
         </div>
       </div>
@@ -379,7 +371,7 @@ function Online({ onExit }: { onExit: () => void }) {
             <div>
               <h3>Nueva partida</h3>
               <button
-                className="primary"
+                className="start"
                 onClick={async () => {
                   rememberName();
                   entered(await call('createRoom', { name }));
@@ -389,9 +381,10 @@ function Online({ onExit }: { onExit: () => void }) {
               </button>
             </div>
             <div>
-              <h3>Unirse con un código</h3>
+              <h3>Unirse</h3>
               <input value={code} maxLength={5} placeholder="CÓDIGO" onChange={(e) => setCode(e.target.value.toUpperCase())} />
               <button
+                className="start"
                 disabled={code.trim().length < 5}
                 onClick={async () => {
                   rememberName();
@@ -443,7 +436,6 @@ function Lobby({
         </button>
         <h1>Partida {room.code}</h1>
         <p className="lead">
-          Comparte el enlace:{' '}
           <button className="link copy" onClick={() => navigator.clipboard?.writeText(link)} title="Copiar enlace">
             {link}
           </button>
@@ -496,13 +488,11 @@ function Lobby({
             {me.ready ? 'No estoy preparado' : 'Estoy preparado'}
           </button>
           {host && (
-            <button className="primary" disabled={!allReady} onClick={() => run('start')}>
+            <button className="start" disabled={!allReady} onClick={() => run('start')}>
               Iniciar la guerra
             </button>
           )}
         </div>
-        {!host && <p className="hint">Quien creó la partida la iniciará cuando todos estén preparados.</p>}
-        {host && !allReady && <p className="hint">Hacen falta al menos 2 regentes y que todos estén preparados.</p>}
         {error && <div className="error">{error}</div>}
       </div>
     </div>

@@ -8,7 +8,7 @@ export const escudoImg = (r: Reino) => img(`escudo-${r}`);
 export const pergaminoImg = (r: Reino) => img(`pergamino-${r}`);
 export const lugarImg = (r: Reino, tipo: 'ciudad' | 'territorio', i: number) => img(`lugar-${r}-${tipo}-${i}`);
 export const DORSO_TROPA = img('dorso-hierro');
-export const PORTADA = img('dorso-regium');
+export const PORTADA = '/ui/portada.webp';
 
 /** Precarga todas las imágenes para que no parpadeen al aparecer. */
 export function preloadCards(reinos: readonly Reino[]) {
