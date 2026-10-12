@@ -279,10 +279,12 @@ export function Table({
       </header>
 
       {me && mySeat !== null && (
-        <section className={`me-chip-row ${myTurn ? 'turn' : ''}`}>
+        <section className={`me-chip-row ${myTurn ? 'turn' : ''}`} style={{ ['--rc' as string]: REINO_INFO[me.reino].color }}>
           <div className="me-side left">
-            <Rn r={me.reino}>{me.name}</Rn>
-            {g.emperor === mySeat && <span className="crown"> ♛</span>}
+            <span>
+              {me.name}
+              {g.emperor === mySeat && <span className="crown"> ♛</span>}
+            </span>
           </div>
           <div className="chip mine-chip">
             <img src={regenteImg(me.reino)} alt="" />
