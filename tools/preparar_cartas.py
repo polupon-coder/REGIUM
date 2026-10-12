@@ -21,7 +21,7 @@ def recorte(path):
 
 # Nivelado entre reinos: el amarillo se apaga un poco y los demás se aclaran (gamma por reino)
 SATUR_REINO = {"amarillo": 0.86}
-GAMMA_REINO = {"amarillo": 1.14, "rojo": 0.86, "verde": 0.78, "azul": 1.0, "morado": 0.8}
+GAMMA_REINO = {"amarillo": 1.14, "rojo": 0.86, "verde": 0.78, "azul": 0.88, "morado": 0.8}
 
 def reino_de(name):
     for r in GAMMA_REINO:
