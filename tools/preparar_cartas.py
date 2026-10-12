@@ -78,22 +78,25 @@ def mascara_papiro(src, size):
 PAPIRO = os.path.join(os.path.dirname(__file__), "..", "arte", "ui", "pergamino-heroes.webp")
 FONDO_W, FONDO_H = 1400, 1000
 
-def fundir_en_papiro(card, fuerza=0.42):
+def fundir_en_papiro(card, fuerza=0.52):
     """Funde el dibujo (solo su tinta, aclarada) en el papiro de Heroes, con los bordes difuminados."""
     import numpy as np
     from PIL import ImageFilter
     papel = Image.open(PAPIRO).convert("RGB").resize((FONDO_W, FONDO_H), Image.LANCZOS)
     caja = card.getchannel("A").getbbox()
     ilu = card.crop(caja)
-    margen = 0.07
-    w = round(FONDO_W * (1 - 2 * margen)); h = round(w * ilu.height / ilu.width)
-    if h > FONDO_H * (1 - 2 * margen):
-        h = round(FONDO_H * (1 - 2 * margen)); w = round(h * ilu.width / ilu.height)
+    # ampliada: cubre todo el papiro y lo que sobra se recorta (no se ven sus bordes de arriba y abajo)
+    w = round(FONDO_W * 1.1); h = round(w * ilu.height / ilu.width)
+    if h < FONDO_H * 1.1:
+        h = round(FONDO_H * 1.1); w = round(h * ilu.width / ilu.height)
     ilu = ilu.resize((w, h), Image.LANCZOS)
     capa = Image.new("RGBA", (FONDO_W, FONDO_H), (0, 0, 0, 0))
     capa.paste(ilu, ((FONDO_W - w) // 2, (FONDO_H - h) // 2))
     # bordes: se encoge la silueta del papel y se difumina mucho, para que el dibujo se disuelva
-    borde = capa.getchannel("A").filter(ImageFilter.MinFilter(41)).filter(ImageFilter.GaussianBlur(45))
+    marco = Image.new("L", (FONDO_W, FONDO_H), 0)
+    ImageDraw.Draw(marco).rectangle((70, 60, FONDO_W - 71, FONDO_H - 61), fill=255)
+    borde = Image.fromarray(np.minimum(np.asarray(capa.getchannel("A").filter(ImageFilter.MinFilter(41))), np.asarray(marco)))
+    borde = borde.filter(ImageFilter.GaussianBlur(45))
     a = np.asarray(capa.convert("RGB")).astype(np.float32) / 255
     lum = a.mean(2, keepdims=True)
     tinta = (1 - lum) ** 1.15  # cuánto oscurece el dibujo
