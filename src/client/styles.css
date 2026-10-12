@@ -1509,6 +1509,16 @@ button.tropa:disabled {
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
     gap: 6px;
+    padding: 6px 0;
+    background: #0f0b08b0;
+  }
+  .me-chip-row.turn {
+    background: #3a2a16d0;
+  }
+  .me-chip-row .mine-chip {
+    background: none;
+    box-shadow: none;
+    padding: 0;
   }
   .me-side {
     display: flex;

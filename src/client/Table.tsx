@@ -279,12 +279,12 @@ export function Table({
       </header>
 
       {me && mySeat !== null && (
-        <section className="me-chip-row">
+        <section className={`me-chip-row ${myTurn ? 'turn' : ''}`}>
           <div className="me-side left">
             <Rn r={me.reino}>{me.name}</Rn>
             {g.emperor === mySeat && <span className="crown"> ♛</span>}
           </div>
-          <div className={`chip mine-chip ${myTurn ? 'turn' : ''}`}>
+          <div className="chip mine-chip">
             <img src={regenteImg(me.reino)} alt="" />
           </div>
           <div className="me-side right">
