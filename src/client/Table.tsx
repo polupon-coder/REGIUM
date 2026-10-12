@@ -18,6 +18,7 @@ import {
 } from '../engine';
 import { escudoImg, fondoImg, Lugares, lugarImg, pergaminoImg, preloadCards, regenteImg, Tropa } from './cards';
 import { Chart } from './Chart';
+import { isMuted, play, toggleMuted, type Sound } from './sounds';
 import { Rules } from './Rules';
 
 /** Color de texto de cada reino (más claro que el del marco, para leerse sobre fondo oscuro). */
@@ -74,6 +75,7 @@ export function Table({
 }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [muted, setMuted] = useState(isMuted());
   const [panel, setPanel] = useState<'none' | 'rules' | 'log' | 'menu'>('none');
   /** En el móvil la mesa se divide en dos apartados. */
   const [tab, setTab] = useState<'batalla' | 'reinos'>('batalla');
@@ -200,6 +202,32 @@ export function Table({
         add(big, { big: true, title: '', summary: g.history.length - 1 });
         add(big, warNotice(g, name));
       }
+    }
+    // Sonidos
+    if (p) {
+      const sounds: Sound[] = [];
+      const newPlay =
+        g.trick.length > p.trick.length
+          ? g.trick[g.trick.length - 1]
+          : g.lastTrick && JSON.stringify(g.lastTrick) !== JSON.stringify(p.lastTrick)
+            ? g.lastTrick.plays[g.lastTrick.plays.length - 1]
+            : null;
+      if (newPlay) sounds.push(newPlay.card.valor === 10 ? 'rugido' : 'ficha');
+      for (const x of big) {
+        const t = typeof x.title === 'string' ? x.title : '';
+        if (x.plays) sounds.push(x.winner === mySeat ? 'celebracion' : 'batalla');
+        else if (x.summary !== undefined) continue;
+        else if (t.startsWith('Guerra')) sounds.push('fe');
+        else if (t === 'Nuevo territorio') sounds.push('conquista');
+        else if (t === 'Nueva ciudad') sounds.push('construir');
+        else if (t === 'Has fallado tu estrategia') sounds.push('derrota');
+        else if (x.tone === 'bad') sounds.push('destruccion');
+      }
+      if (g.phase === 'GAME_OVER' && p.phase !== 'GAME_OVER')
+        sounds.push(mySeat !== null && g.winners?.includes(mySeat) ? 'victoria' : 'risa');
+      const myTurnNow = g.phase !== 'GAME_OVER' && g.turn === mySeat;
+      if (myTurnNow && (p.turn !== mySeat || p.phase !== g.phase)) sounds.push('turno');
+      sounds.forEach((snd, k) => play(snd, k * 450));
     }
     if (big.length) setBigQueue((q) => [...q, ...big]);
     const newWar = !!p && g.war !== p.war;
@@ -328,6 +356,7 @@ export function Table({
           <div className="menu-box framed" onClick={(e) => e.stopPropagation()}>
             <CoinButton glyph="¶" label="Crónica" onClick={() => setPanel('log')} big />
             <CoinButton glyph="§" label="Reglas" onClick={() => setPanel('rules')} big />
+            <CoinButton glyph={muted ? '♪̸' : '♪'} label={muted ? 'Sin sonido' : 'Sonido'} onClick={() => setMuted(toggleMuted())} big />
             <CoinButton glyph="✕" label="Salir" onClick={onExit} big />
           </div>
         </div>
