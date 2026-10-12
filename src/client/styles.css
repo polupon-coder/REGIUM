@@ -1740,3 +1740,25 @@ input {
     width: 150px;
   }
 }
+
+/* Textos de una sola línea: se reducen un poco si no caben */
+.summary h2,
+.gameover h1 {
+  white-space: nowrap;
+  font-size: clamp(1.15rem, 6.2vw, 2rem);
+}
+.sum-name,
+.rank-name,
+.trono-caption,
+.me-side.left {
+  white-space: nowrap;
+  font-size: clamp(0.85rem, 4vw, 1.15rem);
+}
+.sum-row {
+  grid-template-columns: 64px minmax(0, 1fr) auto minmax(0, 2.4fr);
+}
+@media (max-width: 700px) {
+  .sum-row {
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+  }
+}
