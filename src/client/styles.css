@@ -43,6 +43,7 @@ body,
 }
 body {
   margin: 0;
+  font-variant-numeric: lining-nums;
   /* Mesa de madera con viñeta */
   background-color: var(--bg);
   background-image: radial-gradient(ellipse at 50% 40%, #0000 40%, #0a0705d0 100%), url('/ui/madera.webp');
@@ -77,7 +78,7 @@ button {
   background: linear-gradient(#4a3a28, #2a2016);
   box-shadow: inset 0 1px 0 #c9a24a55, 0 2px 6px #0008;
   padding: 7px 14px;
-  border-radius: 6px;
+  border-radius: 0;
   transition: filter 0.15s, transform 0.05s, background 0.15s;
 }
 button:hover:not(:disabled) {
@@ -113,7 +114,7 @@ input,
 select {
   background: #1b1510;
   border: 1px solid #6b5636;
-  border-radius: 6px;
+  border-radius: 0;
   padding: 7px 10px;
 }
 .error {
@@ -140,12 +141,12 @@ select {
   border: 1px solid var(--gold);
   border-top: none;
   padding: 6px 16px;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0;
 }
 .banner.error {
   top: 34px;
   color: var(--bad);
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 /* Marco de bronce para ventanas y mensajes (con el centro de metal incluido) */
@@ -166,6 +167,7 @@ select {
 
 /* Botón redondo de bronce */
 .coin {
+  font-variant-numeric: lining-nums;
   width: 56px;
   height: 56px;
   min-width: 0;
@@ -174,9 +176,9 @@ select {
   border-radius: 50%;
   background: url('/ui/boton.webp') center / cover no-repeat;
   color: #fff3d0;
-  font-family: 'IM Fell English', serif;
-  font-size: 1.45rem;
-  font-weight: normal;
+  font-family: 'EB Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
   text-shadow: 0 0 4px #000, 0 0 8px #000, 0 1px 2px #000;
   box-shadow: 0 4px 10px #000b;
   transition: transform 0.12s, filter 0.12s;
@@ -295,7 +297,7 @@ select {
 }
 .reino-tile {
   position: relative;
-  border-radius: 12px;
+  border-radius: 0;
   padding: 14px 12px 12px;
   background-size: cover;
   background-position: center;
@@ -313,7 +315,7 @@ select {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 10px;
+  border-radius: 0;
   background: linear-gradient(180deg, #0000 30%, #120d09e6 75%);
   z-index: -1;
 }
@@ -401,7 +403,7 @@ select {
   height: 100%;
   object-fit: cover;
   backface-visibility: hidden;
-  border-radius: 6px;
+  border-radius: 0;
   box-shadow: 0 3px 10px #000a;
 }
 .regente .back {
@@ -413,26 +415,23 @@ select {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   padding: 0 10px 12px;
+  /* Tamaño de las cartas: grandes, ajustadas al ancho y al alto de la pantalla */
+  --card-w: clamp(64px, min(10vw, 15vh), 160px);
+  --lugar-lg: clamp(60px, min(13vw, 14vh), 170px);
 }
 .topbar {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   flex-wrap: wrap;
-  padding: 8px 4px;
-  border-bottom: 1px solid #3d3122;
-}
-.topbar .war {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
+  padding: 6px 2px;
+  border-bottom: 1px solid #5a4630;
 }
 .topbar .brand {
   color: var(--gold);
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   margin: 0;
 }
 .war-n b {
@@ -445,15 +444,15 @@ select {
 .imperial {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 3px 10px 3px 3px;
-  border: 1px solid var(--imp);
-  border-radius: 8px;
-  background: #0006;
+  gap: 6px;
+  color: var(--parch);
 }
 .imperial img {
-  width: 54px;
-  border-radius: 4px;
+  height: 30px;
+  border: 1px solid var(--imp);
+}
+.imperial b {
+  color: var(--gold-soft);
 }
 .topbar nav {
   margin-left: auto;
@@ -461,36 +460,43 @@ select {
   gap: 6px;
 }
 
+/* Rivales: tiras sencillas, sin cajas */
 .rivals {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(var(--rivals), minmax(0, 1fr));
+  gap: 14px;
 }
 .seat {
-  background: linear-gradient(180deg, #2a2119e6, #1c1610e6);
-  border: 1px solid #6b5636;
-  border-top: 3px solid var(--rc);
-  border-radius: 10px;
-  padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  transition: box-shadow 0.25s;
+  padding: 6px 8px 8px;
+  border-top: 3px solid var(--rc);
+  background: #0f0b0899;
+  transition: background 0.25s, box-shadow 0.25s;
 }
 .seat.turn {
-  box-shadow: 0 0 0 2px var(--gold), 0 0 22px #c9a24a55;
+  background: #2b1f1299;
+  box-shadow: inset 0 0 0 1px var(--gold);
 }
 .seat.targetable {
-  box-shadow: 0 0 0 2px var(--bad), 0 0 18px #d9705f55;
+  box-shadow: inset 0 0 0 2px var(--bad);
 }
 .seat-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+.seat-face {
+  height: 46px;
+  aspect-ratio: 88 / 63;
+  object-fit: cover;
+  border-radius: 3px;
 }
 .seat-info {
   flex: 1;
   min-width: 0;
+  line-height: 1.25;
 }
 .pname {
   font-weight: 600;
@@ -500,74 +506,57 @@ select {
 }
 .crown {
   color: var(--gold);
+  font-weight: normal;
 }
 .meta {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--muted);
-  min-height: 1em;
 }
 .bidline {
   font-size: 0.95rem;
+  color: var(--parch);
 }
-.bidline .won {
-  font-weight: 700;
+.bidline b {
   color: var(--gold-soft);
+  font-size: 1.05rem;
 }
-.bidline .sep {
-  color: var(--muted);
-  margin: 0 2px;
-}
-.bidline small {
-  color: var(--muted);
-}
-.bidline.hit .won,
-.bidline.hit .bid {
+.bidline.hit b {
   color: var(--ok);
 }
-.bidline.miss .won {
+.bidline.miss b {
   color: var(--bad);
 }
-.city-count {
-  font-family: 'IM Fell English', serif;
-  font-size: 1.5rem;
-  color: var(--gold);
-  line-height: 1;
+.cities {
+  font-variant-numeric: lining-nums;
+  color: var(--muted);
   white-space: nowrap;
 }
-.city-count small {
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-.seat-hand {
-  display: flex;
-  height: 30px;
-  padding-left: 6px;
-}
-.seat-hand img {
-  height: 30px;
-  margin-left: -9px;
-  border-radius: 2px;
-  box-shadow: -1px 0 3px #000a;
+.cities b {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--gold);
 }
 
-/* Lugares */
+/* Lugares (territorios y ciudades) */
 .lugares {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 5px;
 }
-.lugares.md {
-  width: min(520px, 100%);
+.lugares.lg {
+  grid-template-columns: repeat(7, var(--lugar-lg));
+  justify-content: center;
+  gap: 8px;
 }
 .lugar {
   aspect-ratio: 88 / 63;
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
   padding: 0;
   border: none;
   background: none;
   display: block;
-  box-shadow: 0 2px 5px #0009;
+  box-shadow: 0 3px 8px #000c;
 }
 .lugar img {
   width: 100%;
@@ -578,14 +567,11 @@ select {
 .lugar.reserva {
   border: 1px dashed #5a4a35;
   box-shadow: none;
-  background: #0003;
-}
-.lugar.ciudad {
-  outline: 1px solid var(--gold);
+  background: #0004;
 }
 .lugar.target {
   cursor: pointer;
-  outline: 2px solid var(--bad);
+  outline: 3px solid var(--bad);
   animation: pulse 1.2s ease-in-out infinite;
 }
 @keyframes pulse {
@@ -599,41 +585,33 @@ select {
 .field {
   position: relative;
   flex: 1;
-  min-height: 210px;
-  border-radius: 14px;
+  min-height: calc(var(--card-w) * 1.4 + 70px);
   background-size: cover;
   background-position: center;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 8px 10px;
-  box-shadow: inset 0 0 40px #000c, 0 4px 18px #0008;
-  border: 1px solid #5b4932;
+  padding: 14px 8px;
+  border-top: 1px solid #5a4630;
+  border-bottom: 1px solid #5a4630;
 }
 .field-shade {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, #1b140e55 0%, #120d09cc 80%);
+  background: radial-gradient(ellipse at center, #120d0966 0%, #0a0705e6 85%);
 }
 .battle {
   position: relative;
   display: flex;
-  gap: clamp(6px, 1.6vw, 18px);
+  gap: clamp(8px, 2vw, 26px);
   justify-content: center;
   flex-wrap: wrap;
+  align-items: flex-end;
   min-height: calc(var(--card-w) * 1.4 + 26px);
-  align-items: center;
 }
 .battle.past {
-  opacity: 0.85;
-}
-.battle.empty .big-escudo {
-  width: min(220px, 50vw);
-  border-radius: 8px;
-  opacity: 0.85;
-  box-shadow: 0 6px 24px #000c;
+  opacity: 0.8;
 }
 .played {
   display: flex;
@@ -649,13 +627,13 @@ select {
   }
 }
 .played .who {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--parch);
   text-shadow: 0 1px 3px #000;
 }
 .played.winner .tropa {
-  box-shadow: 0 0 0 3px var(--gold), 0 0 26px #e6cf8faa;
-  transform: translateY(-6px);
+  box-shadow: 0 0 0 3px var(--gold), 0 0 30px #e6cf8fb0;
+  transform: translateY(-8px);
 }
 .played.winner .who {
   color: var(--gold-soft);
@@ -664,7 +642,7 @@ select {
 .status {
   position: relative;
   margin-top: 10px;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: var(--parch);
   text-shadow: 0 1px 4px #000;
   text-align: center;
@@ -678,12 +656,12 @@ select {
 .tropa {
   width: var(--card-w);
   aspect-ratio: 63 / 88;
-  border-radius: calc(var(--card-w) * 0.05);
+  border-radius: calc(var(--card-w) * 0.045);
   padding: 0;
   border: none;
   background: none;
   display: block;
-  box-shadow: 0 4px 12px #000b;
+  box-shadow: 0 6px 16px #000d;
   transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
 }
 .tropa img {
@@ -692,76 +670,125 @@ select {
   display: block;
 }
 .tropa.imperial-card {
-  box-shadow: 0 0 0 2px var(--imp), 0 4px 12px #000b;
+  box-shadow: 0 0 0 2px var(--imp), 0 6px 16px #000d;
 }
 button.tropa.playable:hover:not(:disabled) {
-  transform: translateY(-12px);
-  filter: brightness(1.08);
+  transform: translateY(-14px);
+  filter: brightness(1.1);
 }
 button.tropa:disabled {
   opacity: 1;
 }
 .tropa.dim {
-  filter: grayscale(0.7) brightness(0.55);
+  filter: grayscale(0.75) brightness(0.5);
 }
 
-/* Mi zona */
+/* Mi reino */
 .mine {
-  background: linear-gradient(180deg, #2a2119e6, #18130ee6);
-  border: 1px solid #6b5636;
-  border-radius: 12px;
-  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 8px 0 0;
+  border-top: 3px solid var(--rc);
 }
-.mine.active {
-  box-shadow: 0 0 0 2px var(--gold), 0 0 28px #c9a24a44;
+.mine.active .mine-head {
+  color: var(--gold-soft);
 }
-.mine-info {
+.mine-head {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: baseline;
+  gap: 18px;
   flex-wrap: wrap;
+  justify-content: center;
 }
-.mine-info .lugares {
-  margin-left: auto;
+.mine-head .pname {
+  font-size: 1.1rem;
 }
 .hand {
   display: flex;
   justify-content: center;
-  gap: clamp(3px, 0.8vw, 10px);
-  flex-wrap: wrap;
-  padding-top: 8px;
+  padding-top: 10px;
 }
+/* Si no caben, las cartas se solapan un poco */
+.hand .tropa + .tropa {
+  margin-left: min(10px, calc((100vw - 40px - var(--n) * var(--card-w)) / (var(--n) - 1)));
+}
+
+/* Ventanas de apuesta y de reparto (dentro del campo) */
 .panel {
-  padding: 4px 8px;
-  align-self: center;
-  width: min(560px, 100%);
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  width: min(600px, 100%);
 }
 .panel-title {
   font-family: 'IM Fell English', serif;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--gold-soft);
+  text-align: center;
+}
+.num {
+  font-family: 'EB Garamond', serif;
+  font-weight: 700;
+  font-variant-numeric: lining-nums;
+  font-size: 1.3em;
+  color: var(--gold);
 }
 .bids {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-}
-.bids {
   gap: 10px;
+  justify-content: center;
 }
 .resolve-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+/* Avisos pequeños (apuestas de los rivales) */
+.toasts {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 8px;
+  align-items: center;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 230px;
+  padding: 8px 12px 8px 8px;
+  background: #140e0af0;
+  border: 1px solid var(--gold);
+  box-shadow: 0 8px 20px #000c;
+  animation: slide 0.25s ease-out;
+}
+.toast img {
+  height: 44px;
+  aspect-ratio: 88 / 63;
+  object-fit: cover;
+  border-radius: 3px;
+}
+.toast-title {
+  font-weight: 600;
+  color: var(--gold-soft);
+}
+@keyframes slide {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
 }
 
 /* Capas */
@@ -779,39 +806,142 @@ button.tropa:disabled {
 .overlay.soft {
   background: #0b080699;
 }
+
+/* Ventana grande: guerra nueva, territorio o ciudad ganada… */
+.notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  max-width: 520px;
+  text-align: center;
+  animation: pop 0.3s ease-out;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+}
+.notice img {
+  width: min(420px, 80vw);
+  border-radius: 4px;
+  box-shadow: 0 8px 24px #000;
+}
+.notice.pergamino img {
+  width: min(460px, 80vw);
+}
+.notice h2 {
+  color: var(--gold);
+  font-size: 2rem;
+  margin: 6px 0 0;
+}
+.notice.good h2 {
+  color: var(--gold-soft);
+}
+.notice.bad h2 {
+  color: var(--bad);
+}
+.notice p {
+  margin: 0;
+  color: var(--parch);
+  font-size: 1.1rem;
+}
+
+/* Resumen de la guerra */
 .summary,
 .gameover {
-  padding: 8px 10px;
-  max-width: 640px;
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  padding: 8px 12px;
+  width: min(820px, 100%);
 }
 .summary h2,
 .gameover h1 {
   color: var(--gold);
   text-align: center;
+  margin: 0;
 }
-.summary table {
-  border-collapse: collapse;
+.sum-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
 }
-.summary th,
-.summary td {
-  padding: 5px 8px;
-  border-bottom: 1px solid #3d3122;
-  text-align: center;
+.sum-row {
+  display: grid;
+  grid-template-columns: 70px minmax(90px, 1fr) auto minmax(0, 2.4fr);
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+  border-left: 4px solid var(--rc);
+  background: #0006;
 }
-.summary td:first-child {
-  text-align: left;
+.sum-face {
+  width: 70px;
+  aspect-ratio: 88 / 63;
+  object-fit: cover;
+  border-radius: 3px;
 }
-.summary tr.hit td:nth-child(4) {
+.sum-name {
+  font-weight: 600;
+}
+.sum-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.4rem;
+}
+.sum-row.hit .sum-score b {
   color: var(--ok);
 }
-.summary tr.miss td:nth-child(4) {
+.sum-row.miss .sum-score b {
   color: var(--bad);
+}
+.pips {
+  display: flex;
+  gap: 3px;
+}
+.pips i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+}
+.pips i.on {
+  background: var(--gold);
+}
+.pips i.over {
+  background: var(--bad);
+  border-color: var(--bad);
+}
+.pips i.zero {
+  width: auto;
+  height: auto;
+  border: none;
+  font-style: normal;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.sum-cards {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.sum-cards img {
+  height: 58px;
+  aspect-ratio: 88 / 63;
+  object-fit: cover;
+  border-radius: 3px;
+  box-shadow: 0 3px 8px #000c;
+  animation: pop 0.4s ease-out;
+}
+.sum-cards img.lost {
+  filter: grayscale(1) brightness(0.45);
+  outline: 2px solid var(--bad);
 }
 .dot {
   display: inline-block;
@@ -824,13 +954,22 @@ button.tropa:disabled {
   display: flex;
   gap: 10px;
 }
-.gameover-crown .regente {
-  width: 200px;
+.gameover-crown img {
+  width: 220px;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px #000;
 }
 .ranking {
-  margin: 0;
-  padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   align-self: stretch;
+}
+.rank-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: center;
+  gap: 10px;
 }
 .chart {
   margin: 0;
@@ -947,28 +1086,49 @@ button.tropa:disabled {
   body {
     font-size: 16px;
   }
-  :root {
-    --card-w: clamp(46px, 15vw, 72px);
+  .table {
+    --card-w: clamp(52px, 18vw, 92px);
+    --lugar-lg: calc((100vw - 20px - 6 * 4px) / 7);
+  }
+  .lugares.lg {
+    gap: 4px;
+  }
+  .topbar {
+    gap: 8px 12px;
   }
   .topbar nav {
     margin-left: 0;
   }
-  .imperial img {
-    width: 40px;
-  }
   .rivals {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(min(var(--rivals), 2), minmax(0, 1fr));
+    gap: 8px;
   }
-  .seat .regente.small {
+  .seat-face,
+  .seat .meta {
+    display: none;
+  }
+  .seat .bidline {
+    font-size: 0.85rem;
+  }
+  .cities b {
+    font-size: 1.3rem;
+  }
+  .toasts {
+    width: calc(100vw - 20px);
+  }
+  .sum-row {
+    grid-template-columns: 52px 1fr auto;
+  }
+  .sum-face {
     width: 52px;
   }
-  .city-count {
-    font-size: 1.2rem;
+  .sum-cards {
+    grid-column: 1 / -1;
   }
-  .mine-info .lugares {
-    margin-left: 0;
+  .rank-row {
+    grid-template-columns: 1fr;
   }
-  .hand {
-    gap: 3px;
+  .gameover-crown img {
+    width: 150px;
   }
 }

@@ -131,6 +131,10 @@ describe('resultado de la guerra', () => {
     expect(g.players[0].territorios).toBe(2); // 1 inicial + 1 por acertar
     g = applyAction(g, 0, { type: 'build' });
     expect(g.players[0]).toMatchObject({ territorios: 1, ciudades: 1 });
+    expect(g.history[0].changes[0]).toMatchObject({ territorio: 1, ciudades: 1 });
+    expect(g.lastWar!.changes[0].ciudades).toBe(1);
+    // Tras guardar y cargar (JSON), sigue anotando una sola vez
+    expect(JSON.parse(JSON.stringify(g)).history[0].changes[1].territorio).toBe(0);
     // Los demás fallan: se pasa a la guerra 2 con el siguiente Emperador
     expect(g.war).toBe(1);
     expect(g.emperor).toBe(1);

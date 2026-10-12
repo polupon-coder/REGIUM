@@ -74,7 +74,7 @@ export function Lugares({
   targetTerritory,
 }: {
   player: Player;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   onClick?: LugarClick;
   targetCity?: boolean;
   targetTerritory?: boolean;

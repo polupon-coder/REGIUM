@@ -43,12 +43,28 @@ export interface Play {
   card: Card;
 }
 
+/** Lo que cada jugador ganó o perdió al repartir las victorias de una guerra. */
+export interface WarChanges {
+  /** Territorio ganado por acertar. */
+  territorio: number;
+  /** Ciudades levantadas. */
+  ciudades: number;
+  /** Ciudades arrasadas y territorios conquistados a rivales. */
+  arrasa: number;
+  conquista: number;
+  /** Lo que le arrasaron o conquistaron. */
+  ciudadesPerdidas: number;
+  territoriosPerdidos: number;
+}
+const noChanges = (): WarChanges => ({ territorio: 0, ciudades: 0, arrasa: 0, conquista: 0, ciudadesPerdidas: 0, territoriosPerdidos: 0 });
+
 export interface WarResult {
   war: number;
   batallas: number;
   emperor: number;
   bids: number[];
   won: number[];
+  changes: WarChanges[];
 }
 
 export interface LogEntry {
@@ -335,6 +351,7 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
       me.territorios--;
       me.ciudades++;
       g.actionsLeft--;
+      note(g, seat, 'ciudades');
       log(g, `${me.name} levanta una ciudad.`, seat);
       afterResolveAction(g);
       return g;
@@ -347,6 +364,8 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
       t.ciudades--;
       t.territorios++;
       g.actionsLeft--;
+      note(g, seat, 'arrasa');
+      note(g, action.target, 'ciudadesPerdidas');
       log(g, `${me.name} arrasa una ciudad de ${t.name}.`, seat);
       afterResolveAction(g);
       return g;
@@ -358,6 +377,8 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
       if (t.territorios < 1) throw new RuleError(`${t.name} no tiene territorios.`);
       t.territorios--;
       g.actionsLeft -= 2;
+      note(g, seat, 'conquista');
+      note(g, action.target, 'territoriosPerdidos');
       log(g, `${me.name} conquista un territorio de ${t.name}.`, seat);
       afterResolveAction(g);
       return g;
@@ -371,6 +392,11 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
     }
   }
   throw new RuleError('Acción desconocida.');
+}
+
+/** Anota un cambio en el resultado de la guerra en curso (history y lastWar pueden ser copias). */
+function note(g: GameState, seat: number, key: keyof WarChanges) {
+  for (const w of new Set([g.history.at(-1), g.lastWar])) if (w) w.changes[seat][key]++;
 }
 
 function requireResolve(g: GameState) {
@@ -397,6 +423,7 @@ function endBattles(g: GameState) {
     emperor: g.emperor,
     bids: g.players.map((p) => p.bid ?? 0),
     won: g.players.map((p) => p.won),
+    changes: g.players.map(noChanges),
   };
   g.lastWar = result;
   g.history.push(result);
@@ -413,6 +440,7 @@ function beginResolver(g: GameState) {
     if (hit(p)) {
       if (reserva(p) > 0) {
         p.territorios++;
+        note(g, g.turn, 'territorio');
         log(g, `${p.name} acierta (${p.bid}) y gana un territorio.`, g.turn);
       } else log(g, `${p.name} acierta (${p.bid}), pero ya tiene todos sus lugares en juego.`, g.turn);
       g.actionsLeft = p.won;

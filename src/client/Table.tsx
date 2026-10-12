@@ -4,7 +4,6 @@ import {
   batallas,
   BOT_LABEL,
   GUERRAS,
-  hit,
   imperial,
   legalBids,
   legalCards,
@@ -13,19 +12,35 @@ import {
   sameCard,
   type Action,
   type BotLevel,
-  type Card,
   type GameState,
   type Play,
+  type Player,
+  type Reino,
 } from '../engine';
-import { CityCount, DORSO_TROPA, Lugares, pergaminoImg, preloadCards, RegenteCard, Tropa, escudoImg } from './cards';
-import { Rules } from './Rules';
+import { escudoImg, Lugares, lugarImg, pergaminoImg, preloadCards, regenteImg, Tropa } from './cards';
 import { Chart } from './Chart';
+import { Rules } from './Rules';
 
 export interface SeatMeta {
   name: string;
   bot: BotLevel | null;
   online?: boolean;
 }
+
+/** Ventana flotante: grande (una a la vez, en el centro) o aviso pequeño (en la esquina). */
+interface Notice {
+  id: number;
+  big: boolean;
+  img?: string;
+  imgKind?: 'lugar' | 'regente' | 'pergamino';
+  title: ReactNode;
+  text?: ReactNode;
+  tone?: 'good' | 'bad';
+}
+
+const BIG_MS = 2600;
+const SMALL_MS = 2800;
+const SUMMARY_MS = 9000;
 
 export function Table({
   game,
@@ -44,7 +59,7 @@ export function Table({
   onExit: () => void;
   /** Botones extra junto a cada jugador (p. ej. ceder a la máquina). */
   seatExtra?: (seat: number) => ReactNode;
-  /** Avisa de si el resumen de la guerra está a la vista (para pausar a las máquinas locales). */
+  /** Avisa de si hay ventanas a la vista (para pausar a las máquinas locales). */
   pauseSummary?: (showing: boolean) => void;
 }) {
   const [error, setError] = useState('');
@@ -55,25 +70,121 @@ export function Table({
   const imp = imperial(g);
   const me = mySeat !== null ? g.players[mySeat] : null;
   const myTurn = mySeat !== null && g.turn === mySeat && g.phase !== 'GAME_OVER';
+  const name = (s: number) => (s === mySeat ? 'Tú' : g.players[s].name);
 
   useEffect(() => preloadCards(g.players.map((p) => p.reino)), [g.players.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resumen de la guerra que acaba de terminar
+  // ------------------------------------------------------------------ Ventanas flotantes
   const [summary, setSummary] = useState<number | null>(null);
-  const seenWars = useRef(g.history.length);
-  useEffect(() => {
-    if (g.history.length > seenWars.current) {
-      seenWars.current = g.history.length;
-      if (g.phase !== 'GAME_OVER') setSummary(g.history.length - 1);
-    }
-  }, [g.history.length, g.phase]);
-  useEffect(() => {
-    pauseSummary?.(summary !== null);
-    if (summary === null) return;
-    const t = setTimeout(() => setSummary(null), 6000);
-    return () => clearTimeout(t);
-  }, [summary]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [bigQueue, setBigQueue] = useState<Notice[]>([]);
+  const [toasts, setToasts] = useState<Notice[]>([]);
+  const nextId = useRef(1);
+  const prev = useRef<GameState | null>(null);
 
+  useEffect(() => {
+    const p = prev.current;
+    prev.current = g;
+    const big: Notice[] = [];
+    const small: Notice[] = [];
+    const add = (list: Notice[], x: Omit<Notice, 'id'>) => list.push({ ...x, id: nextId.current++ });
+
+    if (!p) {
+      if (g.phase !== 'GAME_OVER' && g.battle === 0 && g.phase === 'BID') add(big, warNotice(g, name));
+    } else {
+      // Apuestas de los rivales
+      if (g.war === p.war)
+        g.players.forEach((pl, i) => {
+          if (i !== mySeat && p.players[i].bid === null && pl.bid !== null)
+            add(small, {
+              big: false,
+              img: regenteImg(pl.reino),
+              imgKind: 'regente',
+              title: name(i),
+              text: (
+                <>
+                  apuesta <b className="num">{pl.bid}</b> {pl.bid === 1 ? 'batalla' : 'batallas'}
+                </>
+              ),
+            });
+        });
+      // Lo que gano o pierdo yo
+      if (mySeat !== null) {
+        const a = p.players[mySeat];
+        const b = g.players[mySeat];
+        const built = Math.max(0, b.ciudades - a.ciudades);
+        const razed = Math.max(0, a.ciudades - b.ciudades);
+        const netT = b.territorios - a.territorios + built - razed;
+        const who = p.turn !== mySeat ? name(p.turn) : 'Un rival';
+        if (netT > 0)
+          add(big, {
+            big: true,
+            tone: 'good',
+            img: lugarImg(b.reino, 'territorio', Math.min(7, b.ciudades + b.territorios)),
+            imgKind: 'lugar',
+            title: 'Nuevo territorio',
+            text: 'Has acertado tu apuesta y tu reino crece.',
+          });
+        for (let k = 0; k < built; k++)
+          add(big, {
+            big: true,
+            tone: 'good',
+            img: lugarImg(b.reino, 'ciudad', b.ciudades - built + k + 1),
+            imgKind: 'lugar',
+            title: 'Nueva ciudad',
+            text: `Ya tienes ${b.ciudades - built + k + 1} de 7 ciudades.`,
+          });
+        if (razed > 0)
+          add(big, {
+            big: true,
+            tone: 'bad',
+            img: lugarImg(b.reino, 'ciudad', a.ciudades),
+            imgKind: 'lugar',
+            title: 'Ciudad arrasada',
+            text: `${who} arrasa una de tus ciudades: vuelve a ser territorio.`,
+          });
+        if (netT < 0)
+          add(big, {
+            big: true,
+            tone: 'bad',
+            img: lugarImg(b.reino, 'territorio', Math.max(1, a.ciudades + a.territorios)),
+            imgKind: 'lugar',
+            title: 'Territorio conquistado',
+            text: `${who} te arrebata un territorio.`,
+          });
+      }
+      // Fin de una guerra: resumen y anuncio de la siguiente
+      if (g.war !== p.war && g.phase !== 'GAME_OVER') {
+        setSummary(g.history.length - 1);
+        add(big, warNotice(g, name));
+      }
+    }
+    if (big.length) setBigQueue((q) => [...q, ...big]);
+    if (small.length) setToasts((t) => [...t, ...small].slice(-5));
+  }, [g]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Los avisos pequeños desaparecen solos
+  useEffect(() => {
+    if (!toasts.length) return;
+    const t = setTimeout(() => setToasts((x) => x.slice(1)), SMALL_MS);
+    return () => clearTimeout(t);
+  }, [toasts]);
+
+  // El resumen va primero; después, las ventanas grandes de una en una
+  const currentBig = summary === null ? bigQueue[0] : undefined;
+  useEffect(() => {
+    if (summary === null) return;
+    const t = setTimeout(() => setSummary(null), SUMMARY_MS);
+    return () => clearTimeout(t);
+  }, [summary]);
+  useEffect(() => {
+    if (!currentBig) return;
+    const t = setTimeout(() => setBigQueue((q) => q.slice(1)), BIG_MS);
+    return () => clearTimeout(t);
+  }, [currentBig?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const showing = summary !== null || !!currentBig;
+  useEffect(() => pauseSummary?.(showing), [showing]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ------------------------------------------------------------------ Acciones
   const act = async (a: Action) => {
     if (busy) return;
     setBusy(true);
@@ -90,28 +201,22 @@ export function Table({
 
   const legal = me && g.phase === 'PLAY' && myTurn ? legalCards(me.hand, g.trick, imp) : [];
   const resolve = g.phase === 'RESOLVE' && myTurn ? resolveOptions(g) : null;
-
-  const name = (s: number) => (s === mySeat ? 'Tú' : g.players[s].name);
+  const bidding = g.phase === 'BID' && myTurn;
 
   return (
     <div className="table" style={{ ['--imp' as string]: REINO_INFO[imp].color }}>
       <header className="topbar">
-        <div className="war">
-          <span className="brand">REGIUM</span>
-          <span className="war-n">
-            Guerra <b>{g.war + 1}</b> de {GUERRAS.length}
-          </span>
-          <span className="war-b">
-            {batallas(g)} {batallas(g) === 1 ? 'batalla' : 'batallas'}
-            {g.phase === 'PLAY' && <> · batalla {Math.min(g.battle + 1, batallas(g))}</>}
-          </span>
-        </div>
-        <div className="imperial" title="Las tropas imperiales son el triunfo de esta guerra">
+        <span className="brand">REGIUM</span>
+        <span className="war-n">
+          Guerra <b>{g.war + 1}</b>/{GUERRAS.length}
+        </span>
+        <span className="war-b">
+          {g.phase === 'PLAY' ? `Batalla ${Math.min(g.battle + 1, batallas(g))} de ${batallas(g)}` : `${batallas(g)} ${batallas(g) === 1 ? 'batalla' : 'batallas'}`}
+        </span>
+        <span className="imperial" title="Las tropas imperiales son el triunfo de esta guerra">
           <img src={escudoImg(imp)} alt="" />
-          <span>
-            Imperial: <b>{REINO_INFO[imp].nombre}</b>
-          </span>
-        </div>
+          Imperial: <b>{REINO_INFO[imp].nombre}</b>
+        </span>
         <nav>
           <button onClick={() => setPanel(panel === 'log' ? 'none' : 'log')}>Crónica</button>
           <button onClick={() => setPanel(panel === 'rules' ? 'none' : 'rules')}>Reglas</button>
@@ -119,36 +224,31 @@ export function Table({
         </nav>
       </header>
 
-      <section className="rivals">
+      <section className="rivals" style={{ ['--rivals' as string]: others.length }}>
         {others.map((s) => (
-          <SeatPanel key={s} g={g} seat={s} meta={seats[s]} extra={seatExtra?.(s)} resolve={resolve} act={act} />
+          <SeatPanel key={s} g={g} seat={s} meta={seats[s]} extra={seatExtra?.(s)} resolve={resolve} act={act} name={name} />
         ))}
       </section>
 
       <section className="field" style={{ backgroundImage: `url(${pergaminoImg(g.players[g.emperor].reino)})` }}>
         <div className="field-shade" />
-        <Battle g={g} name={name} />
+        {bidding ? <BidPanel g={g} act={act} busy={busy} /> : resolve ? <ResolvePanel g={g} act={act} busy={busy} /> : <Battle g={g} name={name} />}
         <Status g={g} mySeat={mySeat} name={name} />
       </section>
 
       {me && mySeat !== null && (
-        <section className={`mine ${myTurn ? 'active' : ''}`}>
-          <div className="mine-info">
-            <RegenteCard reino={me.reino} flipped={g.emperor === mySeat} small />
-            <div>
-              <div className="pname">
-                {me.name} {g.emperor === mySeat && <span className="crown" title="Emperador">♛</span>}
-              </div>
-              <BidLine g={g} seat={mySeat} />
-              <CityCount player={me} />
-            </div>
-            <Lugares player={me} />
+        <section className={`mine ${myTurn ? 'active' : ''}`} style={{ ['--rc' as string]: REINO_INFO[me.reino].color }}>
+          <div className="mine-head">
+            <span className="pname">
+              {me.name} {g.emperor === mySeat && <span className="crown">♛ Emperador</span>}
+            </span>
+            <BidLine g={g} seat={mySeat} />
+            <span className="cities">
+              Ciudades <b>{me.ciudades}</b>/7
+            </span>
           </div>
-
-          {g.phase === 'BID' && myTurn && <BidPanel g={g} act={act} busy={busy} />}
-          {resolve && <ResolvePanel g={g} act={act} busy={busy} />}
-
-          <div className="hand">
+          <Lugares player={me} size="lg" />
+          <div className="hand" style={{ ['--n' as string]: Math.max(me.hand.length, 1) }}>
             {me.hand.map((c) => {
               const ok = legal.some((x) => sameCard(x, c));
               return (
@@ -167,7 +267,28 @@ export function Table({
         </section>
       )}
 
-      {summary !== null && g.history[summary] && (
+      <div className="toasts" aria-live="polite">
+        {toasts.map((t) => (
+          <div key={t.id} className="toast">
+            {t.img && <img src={t.img} alt="" />}
+            <div>
+              <div className="toast-title">{t.title}</div>
+              {t.text && <div>{t.text}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {currentBig && g.phase !== 'GAME_OVER' && (
+        <div className="overlay soft" onClick={() => setBigQueue((q) => q.slice(1))}>
+          <div className={`notice framed ${currentBig.tone ?? ''} ${currentBig.imgKind ?? ''}`} role="status">
+            {currentBig.img && <img src={currentBig.img} alt="" />}
+            <h2>{currentBig.title}</h2>
+            {currentBig.text && <p>{currentBig.text}</p>}
+          </div>
+        </div>
+      )}
+      {summary !== null && g.history[summary] && g.phase !== 'GAME_OVER' && (
         <WarSummary g={g} index={summary} name={name} onClose={() => setSummary(null)} />
       )}
       {g.phase === 'GAME_OVER' && <GameOver g={g} name={name} onExit={onExit} />}
@@ -189,18 +310,35 @@ export function Table({
   );
 }
 
+const TROPAS: Record<Reino, string> = { rojo: 'rojas', verde: 'verdes', amarillo: 'amarillas', azul: 'azules', morado: 'moradas' };
+
+/** Anuncio de una guerra: cuántas batallas y en qué reino tiene lugar. */
+function warNotice(g: GameState, name: (s: number) => string): Omit<Notice, 'id'> {
+  const r: Reino = g.players[g.emperor].reino;
+  const nb = batallas(g);
+  return {
+    big: true,
+    img: pergaminoImg(r),
+    imgKind: 'pergamino',
+    title: `Guerra ${g.war + 1}`,
+    text: (
+      <>
+        {nb} {nb === 1 ? 'batalla' : 'batallas'} en el <b>{REINO_INFO[r].nombre}</b>.
+        <br />
+        {name(g.emperor) === 'Tú' ? 'Eres el Emperador' : `Emperador: ${name(g.emperor)}`} · las tropas {TROPAS[r]} son imperiales.
+      </>
+    ),
+  };
+}
+
 function BidLine({ g, seat }: { g: GameState; seat: number }) {
   const p = g.players[seat];
-  if (p.bid === null)
-    return <div className="bidline muted">{g.phase === 'BID' ? (g.turn === seat ? 'Pensando su apuesta…' : 'Sin apuesta aún') : ''}</div>;
-  const done = g.phase === 'RESOLVE';
+  if (p.bid === null) return <span className="bidline muted">{g.phase === 'BID' && g.turn === seat ? 'Apostando…' : 'Sin apuesta'}</span>;
+  const cls = g.phase === 'RESOLVE' ? (p.won === p.bid ? 'hit' : 'miss') : '';
   return (
-    <div className={`bidline ${done ? (hit(p) ? 'hit' : 'miss') : ''}`} title="Batallas ganadas / apuesta">
-      <span className="won">{p.won}</span>
-      <span className="sep">/</span>
-      <span className="bid">{p.bid}</span>
-      <small> batallas</small>
-    </div>
+    <span className={`bidline ${cls}`}>
+      Apuesta <b>{p.bid}</b> · Ganadas <b>{p.won}</b>
+    </span>
   );
 }
 
@@ -211,6 +349,7 @@ function SeatPanel({
   extra,
   resolve,
   act,
+  name,
 }: {
   g: GameState;
   seat: number;
@@ -218,6 +357,7 @@ function SeatPanel({
   extra?: ReactNode;
   resolve: ReturnType<typeof resolveOptions> | null;
   act: (a: Action) => void;
+  name: (s: number) => string;
 }) {
   const p = g.players[seat];
   const turn = g.turn === seat && g.phase !== 'GAME_OVER';
@@ -226,26 +366,24 @@ function SeatPanel({
   return (
     <div className={`seat ${turn ? 'turn' : ''} ${canCity || canTerr ? 'targetable' : ''}`} style={{ ['--rc' as string]: REINO_INFO[p.reino].color }}>
       <div className="seat-head">
-        <RegenteCard reino={p.reino} flipped={g.emperor === seat} small />
+        <img className="seat-face" src={g.emperor === seat ? escudoImg(p.reino) : regenteImg(p.reino)} alt="" />
         <div className="seat-info">
           <div className="pname">
-            {p.name} {g.emperor === seat && <span className="crown" title="Emperador">♛</span>}
-          </div>
-          <div className="meta">
-            {meta.bot ? `máquina · ${BOT_LABEL[meta.bot]}` : meta.online === false ? 'desconectado' : ''}
+            {name(seat)} {g.emperor === seat && <span className="crown">♛</span>}
           </div>
           <BidLine g={g} seat={seat} />
+          <div className="meta">
+            {p.handCount} {p.handCount === 1 ? 'tropa' : 'tropas'}
+            {meta.bot ? ` · máquina ${BOT_LABEL[meta.bot]}` : meta.online === false ? ' · desconectado' : ''}
+          </div>
         </div>
-        <CityCount player={p} />
-      </div>
-      <div className="seat-hand" aria-label={`${p.handCount} tropas en la mano`}>
-        {Array.from({ length: p.handCount }, (_, i) => (
-          <img key={i} src={DORSO_TROPA} alt="" />
-        ))}
+        <span className="cities">
+          <b>{p.ciudades}</b>/7
+        </span>
       </div>
       <Lugares
         player={p}
-        size="sm"
+        size="md"
         targetCity={canCity}
         targetTerritory={canTerr}
         onClick={(tipo) => act(tipo === 'ciudad' ? { type: 'destroyCity', target: seat } : { type: 'destroyTerritory', target: seat })}
@@ -261,12 +399,7 @@ function Battle({ g, name }: { g: GameState; name: (s: number) => string }) {
     : g.lastTrick && (g.battle > 0 || g.phase === 'RESOLVE')
       ? { plays: g.lastTrick.plays, winner: g.lastTrick.winner, past: true }
       : null;
-  if (!showing)
-    return (
-      <div className="battle empty">
-        <img className="big-escudo" src={escudoImg(imperial(g))} alt="" />
-      </div>
-    );
+  if (!showing) return <div className="battle empty" />;
   return (
     <div className={`battle ${showing.past ? 'past' : ''}`}>
       {showing.plays.map((p) => (
@@ -282,14 +415,15 @@ function Battle({ g, name }: { g: GameState; name: (s: number) => string }) {
 function Status({ g, mySeat, name }: { g: GameState; mySeat: number | null; name: (s: number) => string }) {
   let text = '';
   const mine = g.turn === mySeat;
-  if (g.phase === 'BID') text = mine ? '¿Cuántas batallas vas a ganar?' : `${name(g.turn)} decide su apuesta…`;
+  if (g.phase === 'BID') text = mine ? '' : `${name(g.turn)} decide su apuesta…`;
   else if (g.phase === 'PLAY') {
     if (g.trick.length === 0 && g.lastTrick && g.battle > 0) {
       const w = g.lastTrick.winner;
       text = `${w === mySeat ? 'Ganas' : `${name(w)} gana`} la batalla. ${mine ? 'Sales tú.' : `Sale ${name(g.turn)}.`}`;
-    } else if (g.trick.length === 0) text = mine ? 'Eres el Emperador: sales tú.' : `Sale ${name(g.turn)}.`;
+    } else if (g.trick.length === 0) text = mine ? 'Sales tú: juega una tropa.' : `Sale ${name(g.turn)}.`;
     else text = mine ? 'Tu turno: juega una tropa.' : `Turno de ${name(g.turn)}.`;
-  } else if (g.phase === 'RESOLVE') text = mine ? 'Has acertado: reparte tus victorias.' : `${name(g.turn)} reparte sus victorias…`;
+  } else if (g.phase === 'RESOLVE') text = mine ? '' : `${name(g.turn)} reparte sus victorias…`;
+  if (!text) return null;
   return <div className={`status ${mine && g.phase !== 'GAME_OVER' ? 'mine' : ''}`}>{text}</div>;
 }
 
@@ -299,8 +433,8 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
   const sum = g.players.reduce((s, p) => s + (p.bid ?? 0), 0);
   const last = g.players.filter((p) => p.bid === null).length === 1;
   return (
-    <div className="panel bid-panel">
-      <div className="panel-title">Tu apuesta</div>
+    <div className="panel framed">
+      <div className="panel-title">¿Cuántas batallas vas a ganar?</div>
       <div className="bids">
         {Array.from({ length: n + 1 }, (_, b) => (
           <button key={b} className="coin" disabled={busy || !allowed.includes(b)} onClick={() => act({ type: 'bid', n: b })}>
@@ -309,8 +443,7 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
         ))}
       </div>
       <div className="hint">
-        Apuestas hasta ahora: {sum} de {n}.
-        {last && ` Eres el último: no puedes apostar ${n - sum}.`}
+        Apostado por los demás: {sum} de {n}.{last && ` Eres el último: no puedes apostar ${n - sum}.`}
       </div>
     </div>
   );
@@ -320,9 +453,9 @@ function ResolvePanel({ g, act, busy }: { g: GameState; act: (a: Action) => void
   const o = resolveOptions(g);
   const left = g.actionsLeft;
   return (
-    <div className="panel resolve-panel">
+    <div className="panel framed">
       <div className="panel-title">
-        Te {left === 1 ? 'queda' : 'quedan'} <b>{left}</b> {left === 1 ? 'victoria' : 'victorias'}
+        Te {left === 1 ? 'queda' : 'quedan'} <b className="num">{left}</b> {left === 1 ? 'victoria' : 'victorias'}
       </div>
       <div className="resolve-actions">
         <button className="primary" disabled={busy || !o.build} onClick={() => act({ type: 'build' })}>
@@ -333,49 +466,59 @@ function ResolvePanel({ g, act, busy }: { g: GameState; act: (a: Action) => void
         </button>
       </div>
       <div className="hint">
-        {o.destroyCity.length > 0 && 'Toca una ciudad rival para arrasarla (1 victoria). '}
-        {o.destroyTerritory.length > 0 && 'Toca un territorio rival para conquistarlo (2 victorias).'}
+        {o.destroyCity.length > 0 && 'O toca una ciudad rival para arrasarla (1 victoria). '}
+        {o.destroyTerritory.length > 0 && 'Un territorio rival se conquista con 2 victorias.'}
       </div>
     </div>
   );
+}
+
+/** Cartas que un jugador ha conseguido (o perdido) en una guerra. */
+function acquired(p: Player, c: GameState['history'][number]['changes'][number]) {
+  const out: { src: string; lost?: boolean }[] = [];
+  const total = Math.min(7, Math.max(1, p.ciudades + p.territorios));
+  if (c.territorio) out.push({ src: lugarImg(p.reino, 'territorio', total) });
+  for (let k = 0; k < c.ciudades; k++) out.push({ src: lugarImg(p.reino, 'ciudad', Math.max(1, p.ciudades - k)) });
+  for (let k = 0; k < c.ciudadesPerdidas; k++) out.push({ src: lugarImg(p.reino, 'ciudad', Math.min(7, p.ciudades + k + 1)), lost: true });
+  for (let k = 0; k < c.territoriosPerdidos; k++) out.push({ src: lugarImg(p.reino, 'territorio', Math.min(7, total + k + 1)), lost: true });
+  return out;
 }
 
 function WarSummary({ g, index, name, onClose }: { g: GameState; index: number; name: (s: number) => string; onClose: () => void }) {
   const w = g.history[index];
   return (
     <div className="overlay soft" onClick={onClose}>
-      <div className="summary" onClick={(e) => e.stopPropagation()}>
+      <div className="summary framed" onClick={(e) => e.stopPropagation()}>
         <h2>Fin de la guerra {w.war + 1}</h2>
-        <table>
-          <thead>
-            <tr>
-              <th />
-              <th>Apuesta</th>
-              <th>Ganadas</th>
-              <th />
-              <th>Ciudades</th>
-            </tr>
-          </thead>
-          <tbody>
-            {g.players.map((p, i) => {
-              const ok = w.bids[i] === w.won[i];
-              return (
-                <tr key={i} className={ok ? 'hit' : 'miss'}>
-                  <td>
-                    <span className="dot" style={{ background: REINO_INFO[p.reino].color }} /> {name(i)}
-                    {w.emperor === i && ' ♛'}
-                  </td>
-                  <td>{w.bids[i]}</td>
-                  <td>{w.won[i]}</td>
-                  <td>{ok ? 'Acierta' : 'Falla'}</td>
-                  <td>{p.ciudades}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="sum-rows">
+          {g.players.map((p, i) => {
+            const ok = w.bids[i] === w.won[i];
+            const cards = w.changes ? acquired(p, w.changes[i]) : [];
+            return (
+              <div key={i} className={`sum-row ${ok ? 'hit' : 'miss'}`} style={{ ['--rc' as string]: REINO_INFO[p.reino].color }}>
+                <img className="sum-face" src={regenteImg(p.reino)} alt="" />
+                <div className="sum-name">
+                  {name(i)}
+                  {w.emperor === i && ' ♛'}
+                </div>
+                <div className="sum-score" title="Ganadas / apuesta">
+                  <span className="pips">
+                    {Array.from({ length: Math.max(w.bids[i], w.won[i]) }, (_, k) => (
+                      <i key={k} className={k < w.won[i] ? (k < w.bids[i] ? 'on' : 'over') : 'off'} />
+                    ))}
+                    {w.bids[i] === 0 && w.won[i] === 0 && <i className="zero">0</i>}
+                  </span>
+                  <b>{ok ? '✓' : '✗'}</b>
+                </div>
+                <div className="sum-cards">
+                  {cards.length ? cards.map((c, k) => <img key={k} src={c.src} alt="" className={c.lost ? 'lost' : ''} />) : <span className="muted">—</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
         <button className="primary" onClick={onClose}>
-          Siguiente guerra
+          Continuar
         </button>
       </div>
     </div>
@@ -389,28 +532,29 @@ function GameOver({ g, name, onExit }: { g: GameState; name: (s: number) => stri
     .sort((a, b) => b.p.ciudades - a.p.ciudades || b.p.territorios - a.p.territorios);
   return (
     <div className="overlay">
-      <div className="gameover">
+      <div className="gameover framed">
         <div className="gameover-crown">
           {winners.map((w) => (
-            <RegenteCard key={w} reino={g.players[w].reino} />
+            <img key={w} src={regenteImg(g.players[w].reino)} alt="" />
           ))}
         </div>
         <h1>
-          {winners.map((w) => name(w)).join(' y ')} {winners.length > 1 ? 'comparten' : winners[0] === undefined ? '' : name(winners[0]) === 'Tú' ? 'ganas' : 'gana'} la corona
+          {winners.map((w) => name(w)).join(' y ')}{' '}
+          {winners.length > 1 ? 'comparten' : winners[0] !== undefined && name(winners[0]) === 'Tú' ? 'ganas' : 'gana'} la corona
         </h1>
         <p>
           {g.endReason === 'ciudades'
             ? `Siete ciudades levantadas en la guerra ${g.war + 1}.`
             : 'Tras las 19 guerras, nadie levantó siete ciudades: manda quien más tiene.'}
         </p>
-        <ol className="ranking">
+        <div className="ranking">
           {ranking.map(({ p, i }) => (
-            <li key={i}>
-              <span className="dot" style={{ background: REINO_INFO[p.reino].color }} /> {name(i)} — {p.ciudades} ciudades,{' '}
-              {p.territorios} territorios
-            </li>
+            <div key={i} className="rank-row">
+              <span className="rank-name">{name(i)}</span>
+              <Lugares player={p} size="md" />
+            </div>
           ))}
-        </ol>
+        </div>
         <Chart g={g} name={name} />
         <button className="primary" onClick={onExit}>
           Volver al inicio
@@ -433,5 +577,3 @@ function Drawer({ title, onClose, children }: { title: string; onClose: () => vo
     </aside>
   );
 }
-
-export type { Card };
