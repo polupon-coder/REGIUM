@@ -175,7 +175,7 @@ export function Table({
             img: lugarImg(b.reino, 'territorio', Math.min(7, b.ciudades + b.territorios)),
             imgKind: 'lugar',
             title: 'Nuevo territorio',
-            text: 'Has acertado tu estrategia.',
+            text: 'Has acertado',
           });
         for (let k = 0; k < built; k++)
           add(big, {
