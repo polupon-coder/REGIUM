@@ -148,8 +148,8 @@ export function Table({
             tone: 'bad',
             img: regenteImg(g.players[mySeat].reino),
             imgKind: 'regente',
-            title: 'Has fallado tu estrategia',
-            text: `Apostaste ${w.bids[mySeat]} y ganaste ${w.won[mySeat]}.`,
+            title: 'Fallaste',
+            text: `⚔ ${w.won[mySeat]}/${w.bids[mySeat]}`,
           });
       }
       // Lo que gano o pierdo yo
@@ -220,7 +220,7 @@ export function Table({
         else if (t.startsWith('Guerra')) sounds.push('fe');
         else if (t === 'Nuevo territorio') sounds.push('conquista');
         else if (t === 'Nueva ciudad') sounds.push('construir');
-        else if (t === 'Has fallado tu estrategia') sounds.push('derrota');
+        else if (t === 'Fallaste') sounds.push('derrota');
         else if (x.tone === 'bad') sounds.push('destruccion');
       }
       if (g.phase === 'GAME_OVER' && p.phase !== 'GAME_OVER')
