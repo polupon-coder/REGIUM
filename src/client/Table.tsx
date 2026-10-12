@@ -274,7 +274,6 @@ export function Table({
           </span>
         </div>
         <div className="top-coins">
-          <CoinButton glyph="§" label="Reglas" onClick={() => setPanel(panel === 'rules' ? 'none' : 'rules')} />
           <CoinButton glyph="☰" label="Menú" onClick={() => setPanel(panel === 'menu' ? 'none' : 'menu')} />
         </div>
       </header>
