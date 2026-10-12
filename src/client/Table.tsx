@@ -31,13 +31,17 @@ export const TEXTO_REINO: Record<Reino, string> = {
 };
 /* Tinta oscura del color de cada reino para escribir sobre el papiro */
 const TINTA_REINO: Record<Reino, string> = {
-  rojo: '#5e0c04',
-  verde: '#1a3d06',
-  amarillo: '#7a5600',
-  azul: '#17487e',
-  morado: '#3b0c50',
+  rojo: '#6a1208',
+  verde: '#27470c',
+  amarillo: '#6e4e00',
+  azul: '#173f73',
+  morado: '#4a1666',
 };
-const Rn = ({ r, children }: { r: Reino; children: ReactNode }) => <span style={{ color: TEXTO_REINO[r] }}>{children}</span>;
+const Rn = ({ r, children }: { r: Reino; children: ReactNode }) => (
+  <span className="rn" style={{ color: TEXTO_REINO[r], ['--tinta' as string]: TINTA_REINO[r] }}>
+    {children}
+  </span>
+);
 
 export interface SeatMeta {
   name: string;
@@ -535,7 +539,7 @@ function Battle({ g, name }: { g: GameState; name: (s: number) => string }) {
   return (
     <div className={`battle ${showing.past ? 'past' : ''}`}>
       {showing.plays.map((p) => (
-        <div key={p.seat} className={`played ${showing.winner === p.seat ? 'winner' : ''}`} style={{ ['--tinta' as string]: TINTA_REINO[g.players[p.seat].reino] }}>
+        <div key={p.seat} className={`played ${showing.winner === p.seat ? 'winner' : ''}`}>
           <Tropa card={p.card} className={p.card.reino === imperial(g) ? 'imperial-card' : ''} />
           <span className="who">
             <Rn r={g.players[p.seat].reino}>{name(p.seat)}</Rn>

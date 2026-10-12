@@ -2203,7 +2203,8 @@ button.seal:hover:not(:disabled) {
   white-space: nowrap;
   font-size: clamp(0.8rem, 3vw, 1.08rem);
 }
-.field .played .who span[style] {
+/* cualquier nombre de reino escrito sobre el papiro va en su tinta oscura */
+.field .rn {
   color: var(--tinta) !important;
 }
 /* trazo más grueso para la tinta sobre el papiro */
