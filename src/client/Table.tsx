@@ -175,6 +175,8 @@ export function Table({
     if (big.length) setBigQueue((q) => [...q, ...big]);
     const newWar = !!p && g.war !== p.war;
     if (small.length || newWar) setToasts((t) => [...(newWar ? [] : t), ...small].slice(-5));
+    // Los avisos de apuestas sí desaparecen solos
+    for (const x of small) setTimeout(() => setToasts((t) => t.filter((y) => y.id !== x.id)), 2800);
   }, [g]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Ventanas grandes de una en una; se cierran al tocarlas
