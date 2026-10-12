@@ -1127,12 +1127,12 @@ button.tropa:disabled {
   transform: translateY(-14px) scale(1.08);
 }
 .notice img {
-  width: min(420px, calc(100vw - 100px));
+  width: min(420px, calc(100vw - 112px));
   border-radius: 4px;
   box-shadow: 0 8px 24px #000;
 }
 .notice.k-pergamino img {
-  width: min(460px, calc(100vw - 100px));
+  width: min(460px, calc(100vw - 112px));
 }
 .notice h2 {
   color: var(--gold);
