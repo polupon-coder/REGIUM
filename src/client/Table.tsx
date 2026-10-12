@@ -325,7 +325,7 @@ export function Table({
         ))}
       </section>
 
-      <section className="field" style={{ backgroundImage: `url(${fondoImg(g.players[g.emperor].reino)})` }}>
+      <section className="field" style={{ backgroundImage: `url(${fondoImg(g.players[g.emperor].reino)}), url(/ui/papiro-heroes.webp)` }}>
         <div className="field-shade" />
         {bidding ? <BidPanel g={g} act={act} busy={busy} /> : resolve ? <ResolvePanel g={g} act={act} busy={busy} onAttack={() => setTab('reinos')} /> : <Battle g={g} name={name} />}
         <Status g={g} mySeat={mySeat} name={name} />

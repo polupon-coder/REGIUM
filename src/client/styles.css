@@ -2161,3 +2161,30 @@ button.seal:hover:not(:disabled) {
     width: min(120px, calc((var(--reino-h) - 58px) * 0.9));
   }
 }
+
+/* Fondo de la batalla: el pergamino del reino, aislado, sobre el papiro de Heroes (sin negro) */
+.field {
+  background-size: auto 92%, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-color: transparent;
+}
+.field-shade {
+  display: none;
+}
+
+/* Cada regente con el fondo de su color, con transparencia */
+.seat {
+  background: color-mix(in srgb, var(--rc) 42%, transparent);
+}
+.seat.turn {
+  background: color-mix(in srgb, var(--rc) 58%, transparent);
+}
+@media (max-width: 700px) {
+  .chip {
+    background: color-mix(in srgb, var(--rc) 42%, transparent);
+  }
+  .chip.turn {
+    background: color-mix(in srgb, var(--rc) 58%, transparent);
+  }
+}

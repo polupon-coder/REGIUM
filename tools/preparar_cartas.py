@@ -51,6 +51,30 @@ def esquinas(card, radius):
     ImageDraw.Draw(m).rounded_rectangle((0, 0, card.size[0] - 1, card.size[1] - 1), radius=radius, fill=255)
     card.putalpha(m); return card
 
+_MASCARA = {}
+
+def mascara_papiro(src, size):
+    """Silueta del papel de los pergaminos (blanco = papel)."""
+    import numpy as np
+    from PIL import ImageFilter
+    if size not in _MASCARA:
+        oscuros = []
+        for r in ESCUDO.values():
+            c, _ = recorte(os.path.join(src, f"pergamino-{r}.jpg"))
+            c = c.resize(size, Image.LANCZOS)
+            oscuros.append(np.asarray(c.convert("L")) < 100)
+        siempre = np.logical_and.reduce(oscuros)
+        m = Image.fromarray((~siempre * 255).astype("uint8")).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MaxFilter(3))
+        # rellena los huecos interiores: solo es fondo lo oscuro conectado con el borde
+        marca = Image.fromarray((siempre * 255).astype("uint8")).copy()
+        W, H = marca.size
+        for xy in [(0, 0), (W - 1, 0), (0, H - 1), (W - 1, H - 1)]:
+            if marca.getpixel(xy) == 255:
+                ImageDraw.floodfill(marca, xy, 128)
+        fuera = np.array(marca) == 128
+        _MASCARA[size] = Image.fromarray((~fuera * 255).astype("uint8")).filter(ImageFilter.MinFilter(3))
+    return _MASCARA[size]
+
 def marco_escudo(dst):
     """Pone a cada escudo un marco del color de su reino, como el que llevan pintado los regentes."""
     import numpy as np
@@ -114,7 +138,11 @@ def main(src, dst):
         nuevo = Image.composite(relleno, rgb, suave).convert("RGBA")
         nuevo.putalpha(card.getchannel("A"))
         card = nuevo
-        card.save(os.path.join(dst, f"fondo-{r}.webp"), quality=80)
+        # Se aísla el papiro: los cinco pergaminos comparten el mismo papel rasgado, así que el negro
+        # que los rodea es lo que está oscuro en los cinco a la vez (la tinta de cada dibujo no coincide)
+        card.putalpha(mascara_papiro(src, card.size).filter(ImageFilter.GaussianBlur(1.2)))
+        card = card.crop(card.getchannel("A").getbbox())
+        card.save(os.path.join(dst, f"fondo-{r}.webp"), quality=82)
     print(len(os.listdir(dst)), "imágenes")
 
 if __name__ == "__main__":
