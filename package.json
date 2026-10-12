@@ -12,7 +12,7 @@
     "jugar": "vite build && tsx src/server/index.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "cartas": "python3 -I tools/preparar_cartas.py arte/originales public/cartas"
+    "cartas": "python3 -I tools/preparar_cartas.py arte/originales public/cartas && python3 -I tools/preparar_ui.py arte/ui public/ui"
   },
   "dependencies": {
     "express": "^5.2.1",

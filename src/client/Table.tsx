@@ -303,7 +303,7 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
       <div className="panel-title">Tu apuesta</div>
       <div className="bids">
         {Array.from({ length: n + 1 }, (_, b) => (
-          <button key={b} disabled={busy || !allowed.includes(b)} onClick={() => act({ type: 'bid', n: b })}>
+          <button key={b} className="coin" disabled={busy || !allowed.includes(b)} onClick={() => act({ type: 'bid', n: b })}>
             {b}
           </button>
         ))}

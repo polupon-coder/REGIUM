@@ -7,6 +7,7 @@ sobre todos. El servidor (o el navegador, en las partidas locales) aplica todas 
   El juego muestra ese mismo texto en el botón **Reglas**.
 - **Arte:** `arte/originales/` contiene las cartas tal como salen de la plantilla de imprenta (sin recortar).
   `npm run cartas` las recorta por la línea de corte y genera las imágenes del juego en `public/cartas/`.
+  `arte/ui/` guarda las texturas de la interfaz (mesa de madera, botón y marco de bronce), que se preparan en `public/ui/`.
 
 ## Modos de juego
 
