@@ -2049,3 +2049,25 @@ button.seal:hover:not(:disabled) {
     filter: saturate(0.82) brightness(0.9);
   }
 }
+
+/* Ordenador: todas las cartas de la mesa más grandes */
+@media (min-width: 701px) {
+  .table {
+    grid-template-columns: minmax(0, 1.45fr) minmax(400px, 1fr);
+    --card-w: clamp(80px, min(11vw, 21vh), 190px);
+  }
+  .my-lugares .lugares,
+  .rivals .lugares {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .seat-face,
+  .mine-head .mine-face {
+    height: auto;
+    width: 120px;
+  }
+  .seat .pname,
+  .mine-head .pname {
+    font-size: 1.2rem;
+  }
+}
