@@ -38,24 +38,16 @@ export function App() {
   return (
     <div className="home">
       <div className="home-bg" style={{ backgroundImage: `url(${PORTADA})` }} />
-      <img className="cover" src={PORTADA} alt="REGIUM" />
+      <img className="cover solo-movil" src={PORTADA} alt="REGIUM" />
+      <img className="titulo-pc solo-pc" src="/ui/titulo.webp" alt="REGIUM" />
       <div className="home-content">
         <div className="menu">
-          <button className="start solo-movil" onClick={() => setScreen('online')}>
+          <button className="start" onClick={() => setScreen('online')}>
             Jugar online
           </button>
-          <button className="start solo-movil" onClick={() => setScreen('local-setup')}>
-            Jugar en este dispositivo
-          </button>
-          <button className="seal solo-pc" onClick={() => setScreen('online')}>
-            Jugar
-            <br />
-            online
-          </button>
-          <button className="seal green solo-pc" onClick={() => setScreen('local-setup')}>
-            Jugar
-            <br />
-            aquí
+          <button className="start" onClick={() => setScreen('local-setup')}>
+            <span className="solo-movil">Jugar en este dispositivo</span>
+            <span className="solo-pc">Jugar aquí</span>
           </button>
           {loadLocal() && (
             <button className="link" onClick={() => setScreen('local')}>

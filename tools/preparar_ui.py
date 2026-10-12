@@ -55,6 +55,13 @@ def main(src, dst):
     og = Image.new("RGB", (1200, 630), (0, 0, 0))
     og.paste(titulo, ((1200 - titulo.width) // 2, (630 - titulo.height) // 2))
     og.save(os.path.join(dst, "enlace.jpg"), quality=88)
+    # Título suelto (con transparencia) para la portada del ordenador
+    t = np.asarray(titulo.convert("RGB")).astype(np.float32)
+    lum = t.mean(axis=2)
+    chroma = t.max(axis=2) - t.min(axis=2)
+    al = np.clip(np.maximum((lum - 38) / 45, (chroma - 22) / 22), 0, 1) * 255
+    tt = Image.fromarray(np.concatenate([t, al[..., None]], axis=2).astype("uint8"), "RGBA")
+    tt.crop(tt.getchannel("A").point(lambda v: 255 if v > 40 else 0).getbbox()).save(os.path.join(dst, "titulo.webp"), quality=90)
     # Icono: el título recortado en cuadrado no se lee; se usa la letra R del título
     r = card.crop((round(card.width * 0.06), round(card.height * 0.855), round(card.width * 0.22), round(card.height * 0.985)))
     icon = Image.new("RGB", (max(r.size), max(r.size)), (0, 0, 0))
@@ -62,7 +69,7 @@ def main(src, dst):
     icon = a_negro(icon)
     icon.resize((192, 192), Image.LANCZOS).save(os.path.join(dst, "icono.png"))
     # Placa de metal para los botones de iniciar: el fondo blanco pasa a transparente
-    import numpy as np
+
     pl = Image.open(os.path.join(src, "placa.webp")).convert("RGB")
     a = np.asarray(pl).astype(np.int16)
     ys, xs = np.where(a.min(axis=2) < 200)

@@ -1999,3 +1999,35 @@ button.seal:hover:not(:disabled) {
     font-size: clamp(0.8rem, 1vw, 1rem);
   }
 }
+
+/* Portada en ordenador (definitiva): mesa de madera oscura, el título y las placas de metal */
+@media (min-width: 701px) {
+  .home {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center;
+    justify-content: center;
+    gap: 7vh;
+  }
+  .home-content {
+    background: none !important;
+    align-self: center !important;
+    justify-self: center !important;
+  }
+  .titulo-pc {
+    display: block !important;
+    width: min(760px, 62vw);
+    height: auto;
+    filter: drop-shadow(0 6px 18px #000);
+  }
+  .solo-pc.titulo-pc {
+    display: block !important;
+  }
+  span.solo-pc {
+    display: inline !important;
+  }
+  .home-content .menu button.start {
+    width: 340px;
+    font-size: 1.25rem;
+  }
+}
