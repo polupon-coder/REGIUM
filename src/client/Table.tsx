@@ -16,7 +16,7 @@ import {
   type Player,
   type Reino,
 } from '../engine';
-import { escudoImg, fondoImg, Lugares, lugarImg, pergaminoImg, preloadCards, regenteImg, Tropa } from './cards';
+import { fondoImg, Lugares, lugarImg, pergaminoImg, preloadCards, regenteImg, Tropa } from './cards';
 import { Chart } from './Chart';
 import { isMuted, play, toggleMuted, type Sound } from './sounds';
 import { Rules } from './Rules';
@@ -146,7 +146,7 @@ export function Table({
           add(big, {
             big: true,
             tone: 'bad',
-            img: escudoImg(g.players[mySeat].reino),
+            img: regenteImg(g.players[mySeat].reino),
             imgKind: 'regente',
             title: 'Has fallado tu estrategia',
             text: `Apostaste ${w.bids[mySeat]} y ganaste ${w.won[mySeat]}.`,
@@ -264,7 +264,7 @@ export function Table({
   return (
     <div className={`table tab-${tab}`} style={{ ['--imp' as string]: REINO_INFO[imp].color, ['--np' as string]: n }}>
       <header className="topbar">
-        <img className="imp-escudo" src={escudoImg(imp)} alt="" title={`Imperial: ${REINO_INFO[imp].nombre}`} />
+        <img className="imp-escudo" src={regenteImg(imp)} alt="" title={`Imperial: ${REINO_INFO[imp].nombre}`} />
         <div className="war-info">
           <span className="war-n">
             Guerra <b>{g.war + 1}</b>/{GUERRAS.length}
@@ -289,9 +289,12 @@ export function Table({
               style={{ ['--rc' as string]: REINO_INFO[p.reino].color }}
               onClick={() => setTab('reinos')}
             >
-              <img src={g.emperor === s ? escudoImg(p.reino) : regenteImg(p.reino)} alt="" />
+              <img src={regenteImg(p.reino)} alt="" />
               <span className="chip-bid">{p.bid === null ? '–' : `${p.won}/${p.bid}`}</span>
-              <span className="chip-cities">♜{p.ciudades}</span>
+              <span className="chip-cities">
+                ♜{p.ciudades}
+                {g.emperor === s && <span className="crown"> ♛</span>}
+              </span>
             </button>
           );
         })}
@@ -467,7 +470,7 @@ function SeatPanel({
   return (
     <div className={`seat ${turn ? 'turn' : ''} ${canCity || canTerr ? 'targetable' : ''}`} style={{ ['--rc' as string]: REINO_INFO[p.reino].color }}>
       <div className="seat-head">
-        <img className="seat-face" src={g.emperor === seat ? escudoImg(p.reino) : regenteImg(p.reino)} alt="" />
+        <img className="seat-face" src={regenteImg(p.reino)} alt="" />
         <div className="seat-info">
           <div className="pname">
             <Rn r={p.reino}>{name(seat)}</Rn> {g.emperor === seat && <span className="crown">♛</span>}
