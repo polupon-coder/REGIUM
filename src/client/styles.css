@@ -2236,3 +2236,12 @@ button.seal:hover:not(:disabled) {
     padding: 6px 8px 8px;
   }
 }
+
+/* Resumen de la guerra: cada reino en su franja de color translúcido */
+.sum-row {
+  background: color-mix(in srgb, var(--rc) 42%, transparent);
+}
+.sum-row .sum-name,
+.sum-row .sum-name .rn {
+  color: #fff !important;
+}
