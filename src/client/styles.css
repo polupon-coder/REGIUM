@@ -1553,7 +1553,7 @@ input {
     gap: 6px;
     padding: 6px 0;
     /* fondo del color de tu reino, oscurecido */
-    background: linear-gradient(#0006, #0006), var(--rc);
+    background: color-mix(in srgb, var(--rc) 42%, transparent);
   }
 
   .me-side.left {
@@ -1860,7 +1860,7 @@ input {
     justify-content: flex-start;
     padding: 6px 8px;
     gap: 12px;
-    background: linear-gradient(#0006, #0006), var(--rc);
+    background: color-mix(in srgb, var(--rc) 42%, transparent);
   }
   .mine-head .mine-face {
     display: initial;
@@ -2081,7 +2081,7 @@ button.seal:hover:not(:disabled) {
 @media (min-width: 701px) {
   .field {
     align-self: start;
-    aspect-ratio: 862 / 588;
+    aspect-ratio: 900 / 644;
     max-height: 100%;
     width: 100%;
   }
@@ -2089,11 +2089,75 @@ button.seal:hover:not(:disabled) {
 @media (max-width: 700px) {
   .field {
     flex: none;
-    aspect-ratio: 862 / 588;
+    aspect-ratio: 900 / 644;
     min-height: 0;
     padding: 6px 4px;
   }
   .field .battle {
     min-height: 0;
+  }
+}
+
+/* Tu estrategia: texto y gemas más grandes */
+.bid-panel .panel-title {
+  font-size: clamp(1.4rem, 5.5vw, 2rem);
+}
+.bid-panel .gem {
+  width: clamp(56px, 13vw, 76px);
+  height: clamp(56px, 13vw, 76px);
+  font-size: clamp(1.5rem, 5.5vw, 2rem);
+}
+.bid-panel .bids {
+  gap: clamp(8px, 2vw, 14px);
+}
+
+/* Móvil, apartado Reinos: tu franja con el color de tu reino en transparencia (nunca color puro) */
+@media (max-width: 700px) {
+  .tab-reinos .mine-head {
+    padding: 6px 8px;
+    background: color-mix(in srgb, var(--rc) 42%, transparent);
+  }
+  .tab-reinos .mine-head .pname,
+  .tab-reinos .mine-head .pname * {
+    color: #fff !important;
+  }
+}
+
+/* Ordenador: todos los reinos caben en la columna derecha sin desplazarse */
+@media (min-width: 701px) {
+  .table {
+    /* alto disponible para cada reino según cuántos hay */
+    --reino-h: calc((100vh - 96px) / var(--np) - 16px);
+    --lugar-w: min(30%, calc((var(--reino-h) - 66px) * 88 / 63));
+  }
+  .rivals {
+    overflow: hidden;
+  }
+  .my-lugares .lugares,
+  .rivals .lugares {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+  .mine-head {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  .my-lugares {
+    padding: 6px 8px !important;
+  }
+  .my-lugares .lugar,
+  .rivals .lugar {
+    flex: 0 1 var(--lugar-w);
+    min-width: 0;
+  }
+  .seat {
+    gap: 4px;
+    padding: 4px 8px 6px;
+  }
+  .seat-face,
+  .mine-head .mine-face {
+    width: min(120px, calc((var(--reino-h) - 58px) * 0.9));
   }
 }

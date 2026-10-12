@@ -86,14 +86,34 @@ def main(src, dst):
         card = esquinas(card, round(RADIUS_MM * s * scale))
         card.save(os.path.join(dst, name + ".webp"), quality=82, method=6)
     marco_escudo(dst)
-    # Fondo de la batalla: el pergamino de cada reino sin el círculo de color ni los bordes rasgados
+    # Fondo de la batalla: el pergamino entero (con su borde de papiro) y sin la esfera de color
+    from PIL import ImageFilter
     for r in ESCUDO.values():
         card, sc = recorte(os.path.join(src, f"pergamino-{r}.jpg"))
-        r_ = reino_de(f"-{r}")
-        card = niveles(card, GAMMA_REINO.get(r_, 1.0), SATUR_REINO.get(r_, 1.0)).convert("RGB")
-        w, h = card.size
-        card = card.crop((round(w * 0.12), round(h * 0.14), round(w * 0.95), round(h * 0.93)))
-        card.thumbnail((900, 900))
+        card = niveles(card, GAMMA_REINO.get(r, 1.0), SATUR_REINO.get(r, 1.0))
+        card = card.resize((900, round(900 * card.height / card.width)), Image.LANCZOS)
+        card = esquinas(card, round(RADIUS_MM * sc * 900 / card.width))
+        # se tapa la esfera rellenando con el papel de su alrededor (difuminado), sin copiar dibujos
+        import numpy as np
+        rgb = card.convert("RGB")
+        hueco = Image.new("L", card.size, 0)
+        ImageDraw.Draw(hueco).ellipse((50, 47, 122, 119), fill=255)
+        conocido = Image.eval(hueco, lambda v: 255 - v)
+        base = Image.composite(rgb, Image.new("RGB", card.size), conocido)
+        capas = []
+        for radio in (8, 16, 32):
+            num = np.asarray(base.filter(ImageFilter.GaussianBlur(radio))).astype(np.float32)
+            den = np.asarray(conocido.filter(ImageFilter.GaussianBlur(radio))).astype(np.float32)[..., None] / 255
+            capas.append((num / np.maximum(den, 1e-3), den))
+        relleno = capas[-1][0]
+        for valor, den in reversed(capas[:-1]):
+            peso = np.clip((den - 0.08) / 0.25, 0, 1)
+            relleno = valor * peso + relleno * (1 - peso)
+        relleno = Image.fromarray(np.clip(relleno, 0, 255).astype("uint8"))
+        suave = hueco.filter(ImageFilter.GaussianBlur(4))
+        nuevo = Image.composite(relleno, rgb, suave).convert("RGBA")
+        nuevo.putalpha(card.getchannel("A"))
+        card = nuevo
         card.save(os.path.join(dst, f"fondo-{r}.webp"), quality=80)
     print(len(os.listdir(dst)), "imágenes")
 
