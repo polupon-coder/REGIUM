@@ -1,6 +1,6 @@
 // Servidor de REGIUM: HTTP estático + Socket.IO. El servidor es la única autoridad del estado.
 import express from 'express';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { Server, type Socket } from 'socket.io';
@@ -35,8 +35,16 @@ const io = new Server(http, { cors: { origin: true } });
 
 const clientDir = join(process.cwd(), 'dist', 'client');
 if (existsSync(clientDir)) {
-  app.use(express.static(clientDir));
-  app.get(/^\/(?!socket\.io).*/, (_req, res) => res.sendFile(join(clientDir, 'index.html')));
+  // index.html con la dirección pública, para que la vista previa del enlace muestre el título
+  const html = readFileSync(join(clientDir, 'index.html'), 'utf8');
+  const page = (req: express.Request, res: express.Response) => {
+    const proto = String(req.headers['x-forwarded-proto'] ?? req.protocol).split(',')[0];
+    res.type('html').send(html.replaceAll('__ORIGIN__', `${proto}://${req.get('host')}`));
+  };
+  app.get('/', page);
+  app.get('/index.html', page);
+  app.use(express.static(clientDir, { index: false }));
+  app.get(/^\/(?!socket\.io).*/, page);
 }
 
 /** Conexiones activas por sala: playerId → nº de sockets. */

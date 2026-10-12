@@ -5,6 +5,15 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(__file__))
 from PIL import Image, ImageDraw, ImageFilter
 
+def a_negro(im):
+    """Funde con negro lo oscuro (el fondo) sin tocar el color de las letras."""
+    a = np.asarray(im.convert("RGB")).astype(np.float32)
+    lum = a.mean(axis=2, keepdims=True)
+    chroma = a.max(axis=2, keepdims=True) - a.min(axis=2, keepdims=True)
+    # las letras son anaranjadas (con color); el fondo es oscuro y casi gris
+    k = np.clip(np.maximum((lum - 38) / 45, (chroma - 22) / 22), 0, 1)
+    return Image.fromarray((a * k).astype("uint8"))
+
 def main(src, dst):
     os.makedirs(dst, exist_ok=True)
     # Fondo de mesa
@@ -38,6 +47,20 @@ def main(src, dst):
     card = card.crop((round(w * 0.075), round(h * 0.06), round(w * 0.925), round(h * 0.94)))
     card = card.resize((900, round(900 * card.height / card.width)), Image.LANCZOS)
     card.save(os.path.join(dst, "portada.webp"), quality=84)
+    # Imagen para la vista previa del enlace (WhatsApp, etc.): el título sobre fondo negro, 1200×630
+    titulo = card.crop((0, round(card.height * 0.845), card.width, card.height))
+    titulo = titulo.resize((1100, round(1100 * titulo.height / titulo.width)), Image.LANCZOS)
+    # el fondo de la ilustración pasa a negro para que no se note el recorte
+    titulo = a_negro(titulo)
+    og = Image.new("RGB", (1200, 630), (0, 0, 0))
+    og.paste(titulo, ((1200 - titulo.width) // 2, (630 - titulo.height) // 2))
+    og.save(os.path.join(dst, "enlace.jpg"), quality=88)
+    # Icono: el título recortado en cuadrado no se lee; se usa la letra R del título
+    r = card.crop((round(card.width * 0.06), round(card.height * 0.855), round(card.width * 0.22), round(card.height * 0.985)))
+    icon = Image.new("RGB", (max(r.size), max(r.size)), (0, 0, 0))
+    icon.paste(r, ((icon.width - r.width) // 2, (icon.height - r.height) // 2))
+    icon = a_negro(icon)
+    icon.resize((192, 192), Image.LANCZOS).save(os.path.join(dst, "icono.png"))
     # Placa de metal para los botones de iniciar: el fondo blanco pasa a transparente
     import numpy as np
     pl = Image.open(os.path.join(src, "placa.webp")).convert("RGB")
