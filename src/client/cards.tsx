@@ -6,6 +6,7 @@ export const tropaImg = (c: Card) => img(`tropa-${c.reino}-${String(c.valor).pad
 export const regenteImg = (r: Reino) => img(`regente-${r}`);
 export const escudoImg = (r: Reino) => img(`escudo-${r}`);
 export const pergaminoImg = (r: Reino) => img(`pergamino-${r}`);
+export const fondoImg = (r: Reino) => img(`fondo-${r}`);
 export const lugarImg = (r: Reino, tipo: 'ciudad' | 'territorio', i: number) => img(`lugar-${r}-${tipo}-${i}`);
 export const DORSO_TROPA = img('dorso-hierro');
 export const PORTADA = '/ui/portada.webp';

@@ -16,7 +16,7 @@ import {
   type Player,
   type Reino,
 } from '../engine';
-import { escudoImg, Lugares, lugarImg, pergaminoImg, preloadCards, regenteImg, Tropa } from './cards';
+import { escudoImg, fondoImg, Lugares, lugarImg, pergaminoImg, preloadCards, regenteImg, Tropa } from './cards';
 import { Chart } from './Chart';
 import { Rules } from './Rules';
 
@@ -152,7 +152,7 @@ export function Table({
             img: lugarImg(b.reino, 'territorio', Math.min(7, b.ciudades + b.territorios)),
             imgKind: 'lugar',
             title: 'Nuevo territorio',
-            text: 'Has acertado tu apuesta: tu reino gana un territorio.',
+            text: 'Has acertado tu estrategia.',
           });
         for (let k = 0; k < built; k++)
           add(big, {
@@ -262,7 +262,7 @@ export function Table({
         ))}
       </section>
 
-      <section className="field" style={{ backgroundImage: `url(${pergaminoImg(g.players[g.emperor].reino)})` }}>
+      <section className="field" style={{ backgroundImage: `url(${fondoImg(g.players[g.emperor].reino)})` }}>
         <div className="field-shade" />
         {bidding ? <BidPanel g={g} act={act} busy={busy} /> : resolve ? <ResolvePanel g={g} act={act} busy={busy} onAttack={() => setTab('reinos')} /> : <Battle g={g} name={name} />}
         <Status g={g} mySeat={mySeat} name={name} />

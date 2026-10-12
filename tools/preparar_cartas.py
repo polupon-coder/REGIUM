@@ -86,6 +86,15 @@ def main(src, dst):
         card = esquinas(card, round(RADIUS_MM * s * scale))
         card.save(os.path.join(dst, name + ".webp"), quality=82, method=6)
     marco_escudo(dst)
+    # Fondo de la batalla: el pergamino de cada reino sin el círculo de color ni los bordes rasgados
+    for r in ESCUDO.values():
+        card, sc = recorte(os.path.join(src, f"pergamino-{r}.jpg"))
+        r_ = reino_de(f"-{r}")
+        card = niveles(card, GAMMA_REINO.get(r_, 1.0), SATUR_REINO.get(r_, 1.0)).convert("RGB")
+        w, h = card.size
+        card = card.crop((round(w * 0.12), round(h * 0.14), round(w * 0.95), round(h * 0.93)))
+        card.thumbnail((900, 900))
+        card.save(os.path.join(dst, f"fondo-{r}.webp"), quality=80)
     print(len(os.listdir(dst)), "imágenes")
 
 if __name__ == "__main__":

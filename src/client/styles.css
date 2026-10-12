@@ -864,13 +864,11 @@ button.start:hover:not(:disabled) {
   align-items: center;
   justify-content: center;
   padding: 14px 8px;
-  border-top: 1px solid #5a4630;
-  border-bottom: 1px solid #5a4630;
 }
 .field-shade {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, #120d0966 0%, #0a0705e6 85%);
+  background: #0b080680;
 }
 .battle {
   position: relative;
@@ -960,7 +958,6 @@ button.tropa:disabled {
   flex-direction: column;
   gap: 10px;
   padding: 8px 0 0;
-  border-top: 1px solid #5a4630;
 }
 .mine.active .mine-head {
   color: var(--gold-soft);
