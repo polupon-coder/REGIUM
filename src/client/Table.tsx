@@ -264,7 +264,7 @@ export function Table({
   return (
     <div className={`table tab-${tab}`} style={{ ['--imp' as string]: REINO_INFO[imp].color, ['--np' as string]: n }}>
       <header className="topbar">
-        <span className="imp-gem" style={{ ['--gc' as string]: TEXTO_REINO[imp] }} title={`La guerra tiene lugar en el ${REINO_INFO[imp].nombre}`} />
+        <span className="imp-gem" style={{ ['--gc' as string]: REINO_INFO[imp].color }} title={`La guerra tiene lugar en el ${REINO_INFO[imp].nombre}`} />
         <div className="war-info">
           <span className="war-n">
             Guerra <b>{g.war + 1}</b>/{GUERRAS.length}
@@ -277,6 +277,19 @@ export function Table({
           <CoinButton glyph="☰" label="Menú" onClick={() => setPanel(panel === 'menu' ? 'none' : 'menu')} />
         </div>
       </header>
+
+      {me && mySeat !== null && (
+        <section className="chips me-chip-row">
+          <div className={`chip mine-chip ${myTurn ? 'turn' : ''}`}>
+            <img src={regenteImg(me.reino)} alt="" />
+            <span className="chip-bid">{me.bid === null ? '–' : `${me.won}/${me.bid}`}</span>
+            <span className="chip-cities">
+              ♜{me.ciudades}
+              {g.emperor === mySeat && <span className="crown"> ♛</span>}
+            </span>
+          </div>
+        </section>
+      )}
 
       <section className="chips" style={{ ['--rivals' as string]: others.length }}>
         {others.map((s) => {

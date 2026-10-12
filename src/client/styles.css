@@ -720,8 +720,7 @@ button.start:hover:not(:disabled) {
   inset: 20%;
   border-radius: 50%;
   background: var(--gc);
-  mix-blend-mode: hard-light;
-  opacity: 0.85;
+  mix-blend-mode: color;
 }
 .imp-gem::before {
   content: '';
@@ -729,7 +728,7 @@ button.start:hover:not(:disabled) {
   inset: 20%;
   z-index: 1;
   border-radius: 50%;
-  background: radial-gradient(circle at 36% 30%, #ffffffcc 0%, #ffffff33 18%, transparent 40%), radial-gradient(circle at 50% 60%, transparent 45%, #0007 100%);
+  background: radial-gradient(circle at 36% 30%, #ffffff99 0%, #ffffff22 18%, transparent 40%);
 }
 .mine-face {
   width: 84px;
@@ -1493,6 +1492,20 @@ button.tropa:disabled {
     border: none;
     background: #0f0b08b0;
     box-shadow: none;
+  }
+  /* Tu regente: encima de los rivales, con el mismo recuadro */
+  .me-chip-row {
+    display: flex;
+    justify-content: center;
+  }
+  .mine-chip {
+    width: calc((100% - 12px) / 3);
+  }
+  .tab-batalla .mine-head .mine-face {
+    display: none;
+  }
+  .tab-reinos .me-chip-row {
+    display: none;
   }
   .chip.turn {
     background: #3a2a16d0;
