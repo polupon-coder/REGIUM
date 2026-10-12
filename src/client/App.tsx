@@ -37,15 +37,18 @@ export function App() {
     );
   return (
     <div className="home">
-      <div className="home-bg" style={{ backgroundImage: `url(${PORTADA})` }} />
       <img className="cover" src={PORTADA} alt="REGIUM" />
       <div className="home-content">
         <div className="menu">
-          <button className="start" onClick={() => setScreen('online')}>
-            Jugar online
+          <button className="seal" onClick={() => setScreen('online')}>
+            Jugar
+            <br />
+            online
           </button>
-          <button className="start" onClick={() => setScreen('local-setup')}>
-            Jugar en este dispositivo
+          <button className="seal green" onClick={() => setScreen('local-setup')}>
+            En este
+            <br />
+            dispositivo
           </button>
           {loadLocal() && (
             <button className="link" onClick={() => setScreen('local')}>

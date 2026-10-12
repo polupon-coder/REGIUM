@@ -1932,3 +1932,50 @@ input {
     font-size: clamp(0.9rem, 1.15vw, 1.2rem);
   }
 }
+
+/* Portada: mesa de madera de fondo y botones de lacre (como en Héroes) */
+.home {
+  background: none;
+}
+.home-bg {
+  display: none;
+}
+.menu {
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center !important;
+  gap: 18px 26px;
+}
+button.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 150px;
+  height: 142px;
+  padding: 14px 22px;
+  border: none;
+  box-shadow: none;
+  background: url('/ui/lacre.webp') center / contain no-repeat;
+  color: #f7e6c4;
+  font-family: 'IM Fell English', serif;
+  font-size: 1.25rem;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow: 0 1px 2px #000a;
+  filter: drop-shadow(0 4px 6px #000a);
+  transition: transform 0.12s, filter 0.12s;
+}
+button.seal.green {
+  background-image: url('/ui/lacre-verde.webp');
+}
+button.seal:hover:not(:disabled) {
+  transform: scale(1.06) rotate(-2deg);
+  filter: brightness(1.1) drop-shadow(0 4px 6px #000a);
+}
+@media (min-width: 701px) {
+  button.seal {
+    width: min(170px, 12vw);
+    height: min(160px, 11.3vw);
+    font-size: clamp(1rem, 1.3vw, 1.35rem);
+  }
+}
