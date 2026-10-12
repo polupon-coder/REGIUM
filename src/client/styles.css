@@ -350,10 +350,25 @@ button.start:hover:not(:disabled) {
 
 /* Ordenador: ilustración a la derecha y botones a la izquierda */
 @media (min-width: 701px) {
+  /* Dos mitades iguales: ilustración a la izquierda y botones a la derecha, cada uno centrado en su eje */
   .home {
-    flex-direction: row-reverse;
-    justify-content: center;
-    gap: clamp(28px, 6vw, 90px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    gap: 0;
+  }
+  .home-bg {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .cover {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .home-content {
+    grid-column: 2;
+    grid-row: 1;
   }
   .cover {
     max-height: calc(100vh - 40px);
