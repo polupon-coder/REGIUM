@@ -1,6 +1,7 @@
 """Prepara las texturas de la interfaz (madera, botón y marco de bronce) en public/ui/.
 Uso: python3 -I tools/preparar_ui.py arte/ui public/ui"""
 import sys, os
+import numpy as np
 sys.path.insert(0, os.path.dirname(__file__))
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -56,12 +57,29 @@ def main(src, dst):
     f2.resize((f2.width // 2, f2.height // 2), Image.LANCZOS).save(os.path.join(dst, "marco-simple.webp"), quality=85)
     # Marco de bronce: solo el rectángulo del marco, para usarlo con border-image
     full = Image.open(os.path.join(src, "marco.webp")).convert("RGB")
-    # Centro del marco (metal liso) como fondo de las ventanas
+    # Centro del marco (ya no se usa como fondo; se conserva por compatibilidad)
     c = full.crop((170, 260, 1280, 840))
     c.resize((c.width // 2, c.height // 2), Image.LANCZOS).save(os.path.join(dst, "marco-centro.webp"), quality=80)
-    f = full.crop((38, 127, 1407, 974))
+    # Marco completo con sus adornos y el fondo gris liso convertido en transparente
+    from PIL import ImageDraw as _D
+    rgb = full.copy()
+    mask = Image.new("L", rgb.size, 0)
+    seed = rgb.copy()
+    for xy in [(2, 2), (rgb.width - 3, 2), (2, rgb.height - 3), (rgb.width - 3, rgb.height - 3), (rgb.width // 2, 2), (rgb.width // 2, rgb.height - 3), (2, rgb.height // 2), (rgb.width - 3, rgb.height // 2)]:
+        _D.floodfill(seed, xy, (255, 0, 255), thresh=34)
+    s_ = np.asarray(seed).astype(int)
+    bgmask = (s_[..., 0] == 255) & (s_[..., 1] == 0) & (s_[..., 2] == 255)
+    # Sombra proyectada: fuera del rectángulo del marco, lo oscuro que no es bronce de los adornos
+    lum = np.asarray(rgb.convert("L")).astype(int)
+    outside = np.ones_like(bgmask)
+    outside[127:975, 38:1408] = False
+    bgmask |= outside & (lum < 80)
+    alpha = Image.fromarray(np.where(bgmask, 0, 255).astype("uint8")).filter(ImageFilter.GaussianBlur(1.2))
+    f = rgb.convert("RGBA")
+    f.putalpha(alpha)
+    f = f.crop((0, 77, 1448, 1002))
     f = f.resize((f.width // 2, f.height // 2), Image.LANCZOS)
-    f.save(os.path.join(dst, "marco.webp"), quality=85)
+    f.save(os.path.join(dst, "marco.webp"), quality=88)
     print("marco", f.size)
 
 if __name__ == "__main__":

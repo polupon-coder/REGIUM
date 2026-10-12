@@ -156,13 +156,15 @@ select {
 .gameover,
 .curtain-box,
 .online-choices > div {
-  border: 30px solid transparent;
-  border-image: url('/ui/marco.webp') 84 / 30px round;
+  /* El marco lleva su propio centro de metal y los adornos que sobresalen */
+  border-style: solid;
+  border-color: transparent;
+  border-width: 39px 37px 35px 37px;
+  border-image: url('/ui/marco.webp') 109 104 97 103 fill / 39px 37px 35px 37px round;
   border-radius: 0;
-  background: url('/ui/marco-centro.webp') center / cover;
-  background-clip: padding-box;
+  background: none;
   box-shadow: none;
-  filter: drop-shadow(0 8px 18px #000c);
+  filter: none;
 }
 
 /* Botón redondo de bronce */
@@ -1203,6 +1205,7 @@ button.tropa:disabled {
   align-items: center;
   gap: 12px;
   padding: 6px 8px;
+  background: #0006;
 }
 .sum-face {
   width: 70px;
