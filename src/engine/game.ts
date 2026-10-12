@@ -179,14 +179,9 @@ export function legalCards(hand: Card[], trick: Play[], imp: Reino): Card[] {
   return hand;
 }
 
-/** Apuestas permitidas: el último en apostar no puede hacer que la suma iguale el nº de batallas. */
+/** Apuestas permitidas: cualquier número de 0 al número de batallas. */
 export function legalBids(g: GameState): number[] {
-  const n = batallas(g);
-  const all = Array.from({ length: n + 1 }, (_, i) => i);
-  const pending = g.players.filter((p) => p.bid === null).length;
-  if (pending !== 1) return all;
-  const sum = g.players.reduce((s, p) => s + (p.bid ?? 0), 0);
-  return all.filter((b) => sum + b !== n);
+  return Array.from({ length: batallas(g) + 1 }, (_, i) => i);
 }
 
 /** ¿Ha acertado su apuesta? */
@@ -295,11 +290,7 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
     case 'bid': {
       if (g.phase !== 'BID') throw new RuleError('Ahora no se apuesta.');
       if (!legalBids(g).includes(action.n)) {
-        throw new RuleError(
-          action.n >= 0 && action.n <= batallas(g)
-            ? `No puedes apostar ${action.n}: la suma de apuestas no puede ser igual al número de batallas.`
-            : 'Apuesta no válida.',
-        );
+        throw new RuleError('Apuesta no válida.');
       }
       me.bid = action.n;
       log(g, `${me.name} apuesta ${action.n}.`, seat);

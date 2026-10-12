@@ -31,8 +31,7 @@ La partida tiene 10 guerras. La 1.ª tiene 1 batalla, la 2.ª 2 batallas… y la
 ### 1. Estrategia (apuesta)
 
 Empezando por el Emperador y siguiendo hacia la izquierda, cada jugador anuncia cuántas batallas va a
-ganar (de 0 al número de batallas). **El último en apostar no puede decir un número que haga que la
-suma de apuestas sea igual al número de batallas.**
+ganar (de 0 al número de batallas). Cada uno puede apostar lo que quiera.
 
 ### 2. Batallas
 

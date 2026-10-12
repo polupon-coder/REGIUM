@@ -94,12 +94,14 @@ describe('cartas legales: siempre hay que superar si se puede', () => {
 });
 
 describe('apuestas', () => {
-  it('el último no puede igualar la suma al número de batallas', () => {
+  it('se puede apostar cualquier número, también el último', () => {
     let g = three(); // 1 batalla
     g = applyAction(g, 0, { type: 'bid', n: 0 });
     g = applyAction(g, 1, { type: 'bid', n: 0 });
-    expect(legalBids(g)).toEqual([0]);
-    expect(() => applyAction(g, 2, { type: 'bid', n: 1 })).toThrow(/suma/);
+    expect(legalBids(g)).toEqual([0, 1]);
+    g = applyAction(g, 2, { type: 'bid', n: 1 });
+    expect(g.phase).toBe('PLAY');
+    expect(() => applyAction(three(), 0, { type: 'bid', n: 2 })).toThrow();
   });
   it('no se puede apostar fuera de turno', () => {
     expect(() => applyAction(three(), 1, { type: 'bid', n: 0 })).toThrow(/turno/);
