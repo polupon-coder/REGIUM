@@ -1903,3 +1903,14 @@ input {
     grid-column: 1;
   }
 }
+
+/* Botones de la portada del mismo tamaño: texto en una línea */
+.menu button.start {
+  white-space: nowrap;
+  font-size: clamp(0.95rem, 4.3vw, 1.25rem);
+}
+@media (min-width: 701px) {
+  .menu button.start {
+    width: 380px;
+  }
+}
