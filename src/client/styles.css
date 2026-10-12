@@ -160,7 +160,7 @@ select {
   border-image: url('/ui/marco.webp') 84 / 30px round;
   border-radius: 0;
   background: url('/ui/marco-centro.webp') center / cover;
-  background-origin: border-box;
+  background-clip: padding-box;
   box-shadow: none;
   filter: drop-shadow(0 8px 18px #000c);
 }
@@ -1092,10 +1092,14 @@ button.tropa:disabled {
   z-index: 40;
   background: #0b0806e6;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 16px;
+  padding: 16px 8px;
   overflow-y: auto;
+}
+/* Centrada si cabe; si es más alta que la pantalla, empieza arriba y se desplaza */
+.overlay > * {
+  margin: auto 0;
 }
 .overlay.soft {
   background: #0b080699;
@@ -1199,7 +1203,6 @@ button.tropa:disabled {
   align-items: center;
   gap: 12px;
   padding: 6px 8px;
-  background: #0006;
 }
 .sum-face {
   width: 70px;
