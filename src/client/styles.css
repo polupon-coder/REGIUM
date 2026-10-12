@@ -2206,3 +2206,23 @@ button.seal:hover:not(:disabled) {
 .field .played .who span[style] {
   color: var(--tinta) !important;
 }
+
+/* Tu reino: el color translúcido ocupa toda tu franja (regente y territorios), como los rivales */
+@media (min-width: 701px) {
+  .my-lugares {
+    background: color-mix(in srgb, var(--rc) 42%, transparent);
+  }
+}
+@media (max-width: 700px) {
+  .tab-reinos .mine {
+    gap: 0;
+    padding-top: 0;
+    background: color-mix(in srgb, var(--rc) 42%, transparent);
+  }
+  .tab-reinos .mine-head {
+    background: none;
+  }
+  .tab-reinos .my-lugares {
+    padding: 6px 8px 8px;
+  }
+}

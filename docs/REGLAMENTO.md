@@ -65,6 +65,6 @@ Las victorias que no se puedan o no se quieran usar se pierden. Quien **falla** 
 
 - **Online**: cada jugador en su dispositivo; se comparte el enlace de la partida. Los reinos libres se
   pueden ocupar con bots.
-- **En este dispositivo**: contra bots, por turnos entre varias personas en el mismo dispositivo
+- **Jugar aquí**: contra bots, por turnos entre varias personas en el mismo dispositivo
   (la pantalla se oculta al pasar el turno para que nadie vea las cartas ajenas), o mezclando ambos.
 - **Bots**: imaginan repartos posibles de las cartas que no ven (nunca miran las cartas de los demás) para decidir su estrategia y cada tropa; al repartir victorias levantan ciudades y frenan a quien está cerca de ganar.

@@ -46,8 +46,7 @@ export function App() {
             Jugar online
           </button>
           <button className="start" onClick={() => setScreen('local-setup')}>
-            <span className="solo-movil">Jugar en este dispositivo</span>
-            <span className="solo-pc">Jugar aquí</span>
+            Jugar aquí
           </button>
           {loadLocal() && (
             <button className="link" onClick={() => setScreen('local')}>
@@ -156,7 +155,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
   };
   return (
     <div className="setup">
-      <SetupHead title="En este dispositivo" onBack={onBack} />
+      <SetupHead title="Jugar aquí" onBack={onBack} />
       <div className="tronos">
         {REINOS.map((r) => {
           const s = seats[r];
