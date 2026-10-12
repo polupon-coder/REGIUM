@@ -704,6 +704,40 @@ button.start:hover:not(:disabled) {
   aspect-ratio: 88 / 63;
   object-fit: cover;
 }
+.imp-gem {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 50%;
+  background: url('/ui/boton-gema.webp') center / cover no-repeat;
+  box-shadow: 0 4px 10px #000c;
+}
+/* El cristal toma el color del reino donde tiene lugar la guerra */
+.imp-gem::after {
+  content: '';
+  position: absolute;
+  inset: 21%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #ffffffaa 0%, var(--gc) 35%, #000 120%);
+  mix-blend-mode: color;
+}
+.imp-gem::before {
+  content: '';
+  position: absolute;
+  inset: 21%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #ffffff55 0%, transparent 40%), var(--gc);
+  opacity: 0.45;
+  mix-blend-mode: overlay;
+}
+.mine-face {
+  height: 42px;
+  aspect-ratio: 88 / 63;
+  object-fit: cover;
+  border-radius: 3px;
+  align-self: center;
+}
 .war-info {
   display: flex;
   gap: 14px;
@@ -986,7 +1020,7 @@ button.tropa:disabled {
 }
 .mine-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 18px;
   flex-wrap: wrap;
   justify-content: center;

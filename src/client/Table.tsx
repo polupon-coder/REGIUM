@@ -264,7 +264,7 @@ export function Table({
   return (
     <div className={`table tab-${tab}`} style={{ ['--imp' as string]: REINO_INFO[imp].color, ['--np' as string]: n }}>
       <header className="topbar">
-        <img className="imp-escudo" src={regenteImg(imp)} alt="" title={`Imperial: ${REINO_INFO[imp].nombre}`} />
+        <span className="imp-gem" style={{ ['--gc' as string]: TEXTO_REINO[imp] }} title={`La guerra tiene lugar en el ${REINO_INFO[imp].nombre}`} />
         <div className="war-info">
           <span className="war-n">
             Guerra <b>{g.war + 1}</b>/{GUERRAS.length}
@@ -314,6 +314,7 @@ export function Table({
       {me && mySeat !== null && (
         <section className={`mine ${myTurn ? 'active' : ''}`} style={{ ['--rc' as string]: REINO_INFO[me.reino].color }}>
           <div className="mine-head">
+            <img className="mine-face" src={regenteImg(me.reino)} alt="" />
             <span className="pname">
               <Rn r={me.reino}>{me.name}</Rn> {g.emperor === mySeat && <span className="crown">♛</span>}
             </span>
