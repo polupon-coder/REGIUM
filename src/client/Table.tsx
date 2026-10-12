@@ -458,11 +458,9 @@ function Status({ g, mySeat, name }: { g: GameState; mySeat: number | null; name
 function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; busy: boolean }) {
   const allowed = legalBids(g);
   const n = batallas(g);
-  const sum = g.players.reduce((s, p) => s + (p.bid ?? 0), 0);
-  const last = g.players.filter((p) => p.bid === null).length === 1;
   return (
-    <div className="panel framed">
-      <div className="panel-title">¿Cuántas batallas vas a ganar?</div>
+    <div className="bid-panel">
+      <div className="panel-title">Tu apuesta</div>
       <div className="bids">
         {Array.from({ length: n + 1 }, (_, b) => (
           <button key={b} className="gem" disabled={busy || !allowed.includes(b)} onClick={() => act({ type: 'bid', n: b })}>
@@ -470,7 +468,7 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
           </button>
         ))}
       </div>
-      {last && n - sum >= 0 && <div className="hint">No puedes apostar {n - sum}.</div>}
+
     </div>
   );
 }

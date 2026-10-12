@@ -38,6 +38,25 @@ def esquinas(card, radius):
     ImageDraw.Draw(m).rounded_rectangle((0, 0, card.size[0] - 1, card.size[1] - 1), radius=radius, fill=255)
     card.putalpha(m); return card
 
+def marco_escudo(dst):
+    """Pone a cada escudo un marco del color de su reino, como el que llevan pintado los regentes."""
+    import numpy as np
+    for r in ESCUDO.values():
+        reg = np.asarray(Image.open(os.path.join(dst, f"regente-{r}.webp")).convert("RGB")).astype(int)
+        h, w, _ = reg.shape
+        strip = reg[h // 4 : 3 * h // 4, 3:14].reshape(-1, 3)
+        color = tuple(int(v) for v in np.median(strip, axis=0))
+        esc = Image.open(os.path.join(dst, f"escudo-{r}.webp")).convert("RGBA")
+        W, H = esc.size
+        t = round(W * 0.045)
+        frame = Image.new("RGBA", esc.size, (0, 0, 0, 0))
+        d = ImageDraw.Draw(frame)
+        d.rounded_rectangle((0, 0, W - 1, H - 1), radius=round(W * 0.04), outline=color + (255,), width=t)
+        d.rounded_rectangle((t - 1, t - 1, W - t, H - t), radius=round(W * 0.025), outline=tuple(max(0, c - 40) for c in color) + (255,), width=2)
+        out = Image.alpha_composite(esc, frame)
+        out.putalpha(esc.getchannel("A"))
+        out.save(os.path.join(dst, f"escudo-{r}.webp"), quality=82, method=6)
+
 def main(src, dst):
     os.makedirs(dst, exist_ok=True)
     for p in sorted(glob.glob(os.path.join(src, "*.jpg"))):
@@ -52,6 +71,7 @@ def main(src, dst):
         card = niveles(card)
         card = esquinas(card, round(RADIUS_MM * s * scale))
         card.save(os.path.join(dst, name + ".webp"), quality=82, method=6)
+    marco_escudo(dst)
     print(len(os.listdir(dst)), "imágenes")
 
 if __name__ == "__main__":

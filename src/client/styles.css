@@ -562,9 +562,6 @@ button.start:hover:not(:disabled) {
 .trono.libre .trono-img:hover:not(:disabled) {
   filter: grayscale(0.3) brightness(0.8);
 }
-.trono.ocupado .trono-img {
-  outline-color: var(--rc);
-}
 .trono.mio .trono-img {
   outline-color: var(--gold);
 }
@@ -676,7 +673,6 @@ button.start:hover:not(:disabled) {
   height: 40px;
   aspect-ratio: 88 / 63;
   object-fit: cover;
-  outline: 2px solid var(--imp);
 }
 .war-info {
   display: flex;
@@ -734,7 +730,6 @@ button.start:hover:not(:disabled) {
   flex-direction: column;
   gap: 6px;
   padding: 6px 8px 8px;
-  border-top: 3px solid var(--rc);
   background: #0f0b0899;
   transition: background 0.25s, box-shadow 0.25s;
 }
@@ -933,7 +928,7 @@ button.start:hover:not(:disabled) {
   display: block;
 }
 .tropa.imperial-card {
-  box-shadow: 0 0 0 2px var(--imp), 0 6px 16px #000d;
+  box-shadow: 0 0 0 2px var(--gold), 0 6px 16px #000d;
 }
 button.tropa.playable:hover:not(:disabled) {
   transform: translateY(-14px);
@@ -952,7 +947,7 @@ button.tropa:disabled {
   flex-direction: column;
   gap: 10px;
   padding: 8px 0 0;
-  border-top: 3px solid var(--rc);
+  border-top: 1px solid #5a4630;
 }
 .mine.active .mine-head {
   color: var(--gold-soft);
@@ -986,6 +981,26 @@ button.tropa:disabled {
   gap: 10px;
   padding: 6px 12px;
   width: min(600px, 100%);
+}
+.bid-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  padding: 10px 14px;
+  background: #0d0907c0;
+}
+.bid-panel .gem {
+  width: 48px;
+  height: 48px;
+  font-size: 1.3rem;
+}
+.bid-panel .bids {
+  gap: 8px;
+}
+.bid-panel .panel-title {
+  font-size: 1.1rem;
 }
 .panel-title {
   font-family: 'IM Fell English', serif;
@@ -1140,7 +1155,6 @@ button.tropa:disabled {
   align-items: center;
   gap: 12px;
   padding: 6px 8px;
-  border-left: 4px solid var(--rc);
   background: #0006;
 }
 .sum-face {
@@ -1374,7 +1388,6 @@ button.tropa:disabled {
     gap: 2px;
     padding: 4px 2px 6px;
     border: none;
-    border-top: 3px solid var(--rc);
     background: #0f0b08b0;
     box-shadow: none;
   }
