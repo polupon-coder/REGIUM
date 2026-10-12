@@ -2071,3 +2071,29 @@ button.seal:hover:not(:disabled) {
     font-size: 1.2rem;
   }
 }
+
+/* El paisaje de fondo de la batalla se ve entero, sin recortes */
+.field {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #0b0806;
+}
+@media (min-width: 701px) {
+  .field {
+    align-self: start;
+    aspect-ratio: 862 / 588;
+    max-height: 100%;
+    width: 100%;
+  }
+}
+@media (max-width: 700px) {
+  .field {
+    flex: none;
+    aspect-ratio: 862 / 588;
+    min-height: 0;
+    padding: 6px 4px;
+  }
+  .field .battle {
+    min-height: 0;
+  }
+}
