@@ -13,10 +13,10 @@ import {
   type GameState,
   type Reino,
 } from '../engine';
-import { PORTADA, pergaminoImg, preloadCards, RegenteCard } from './cards';
+import { PORTADA, pergaminoImg, preloadCards, RegenteCard, regenteImg } from './cards';
 import { Rules } from './Rules';
 import { call, forgetSession, lastCode, loadSessions, saveSession, socket, tabSessions, type PublicRoom } from './socket';
-import { Table, type SeatMeta } from './Table';
+import { CoinButton, Table, type SeatMeta } from './Table';
 
 type Screen = 'home' | 'local-setup' | 'local' | 'online' | 'rules';
 const LEVELS: BotLevel[] = ['facil', 'normal', 'dificil'];
@@ -30,12 +30,9 @@ export function App() {
   if (screen === 'online') return <Online onExit={() => setScreen('home')} />;
   if (screen === 'rules')
     return (
-      <div className="page">
+      <div className="setup">
+        <SetupHead title="Reglas" onBack={() => setScreen('home')} />
         <div className="sheet">
-          <button className="back" onClick={() => setScreen('home')}>
-            ← Volver
-          </button>
-          <h1>Reglas de REGIUM</h1>
           <Rules />
         </div>
       </div>
@@ -69,35 +66,42 @@ export function App() {
 // ---------------------------------------------------------------------------------------------
 // Elegir reino (se usa en las dos configuraciones)
 // ---------------------------------------------------------------------------------------------
-function ReinoTile({
+/** Trono de un reino: el retrato del regente; se toca para elegirlo o cambiarlo. */
+function Trono({
   reino,
-  children,
-  selected,
+  state,
+  caption,
+  sub,
   onClick,
+  children,
 }: {
   reino: Reino;
-  children?: React.ReactNode;
-  selected?: boolean;
+  state: 'libre' | 'ocupado' | 'mio';
+  caption: string;
+  sub?: string;
   onClick?: () => void;
+  children?: React.ReactNode;
 }) {
-  const [hover, setHover] = useState(false);
   return (
-    <div
-      className={`reino-tile ${selected ? 'selected' : ''} ${onClick ? 'clickable' : ''}`}
-      style={{ backgroundImage: `url(${pergaminoImg(reino)})`, ['--rc' as string]: REINO_INFO[reino].color }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={onClick}
-    >
-      <RegenteCard reino={reino} flipped={hover} />
-      <div className="reino-name">
-        {REINO_INFO[reino].nombre}
-        <small>{REINO_INFO[reino].escudo}</small>
-      </div>
-      <div className="reino-body" onClick={(e) => e.stopPropagation()}>
-        {children}
-      </div>
+    <div className={`trono ${state}`} style={{ ['--rc' as string]: REINO_INFO[reino].color }}>
+      <button className="trono-img" onClick={onClick} disabled={!onClick} aria-label={REINO_INFO[reino].nombre}>
+        <img src={regenteImg(reino)} alt="" draggable={false} />
+      </button>
+      <div className="trono-caption">{caption}</div>
+      <div className="trono-sub">{sub ?? '\u00a0'}</div>
+      <div className="trono-extra">{children}</div>
     </div>
+  );
+}
+
+/** Cabecera de las pantallas de preparación: volver a la izquierda y título centrado. */
+function SetupHead({ title, onBack, children }: { title: string; onBack: () => void; children?: React.ReactNode }) {
+  return (
+    <header className="setup-head">
+      <CoinButton glyph="←" label="Volver" onClick={onBack} />
+      <h1>{title}</h1>
+      <div className="setup-head-right">{children}</div>
+    </header>
   );
 }
 
@@ -147,47 +151,38 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
     saveLocal({ game, seats: chosen.map((s, i) => ({ name: players[i].name, bot: s.kind === 'human' ? null : s.kind })) });
     onStart();
   };
+  const CYCLE: (LocalSeat['kind'] | null)[] = [null, 'human', 'facil', 'normal', 'dificil'];
+  const cycle = (r: Reino) => {
+    const cur = seats[r]?.kind ?? null;
+    const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
+    set(r, next ? { reino: r, kind: next, name: seats[r]?.name || (next === 'human' ? `Jugador ${humans + 1}` : '') } : null);
+  };
   return (
-    <div className="page">
-      <div className="sheet wide">
-        <button className="back" onClick={onBack}>
-          ← Volver
+    <div className="setup">
+      <SetupHead title="En este dispositivo" onBack={onBack} />
+      <div className="tronos">
+        {REINOS.map((r) => {
+          const s = seats[r];
+          return (
+            <Trono
+              key={r}
+              reino={r}
+              state={!s ? 'libre' : s.kind === 'human' ? 'mio' : 'ocupado'}
+              caption={!s ? 'Libre' : s.kind === 'human' ? 'Persona' : 'Máquina'}
+              sub={s && s.kind !== 'human' ? BOT_LABEL[s.kind] : undefined}
+              onClick={() => cycle(r)}
+            >
+              {s?.kind === 'human' && (
+                <input value={s.name} maxLength={20} placeholder="Nombre" onChange={(e) => set(r, { ...s, name: e.target.value })} />
+              )}
+            </Trono>
+          );
+        })}
+      </div>
+      <div className="setup-foot">
+        <button className="start" disabled={chosen.length < 2 || humans < 1} onClick={start}>
+          Empezar la guerra
         </button>
-        <h1>Partida en este dispositivo</h1>
-        <div className="reinos">
-          {REINOS.map((r) => {
-            const s = seats[r];
-            return (
-              <ReinoTile key={r} reino={r} selected={!!s}>
-                <select
-                  value={s ? s.kind : 'none'}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v === 'none') set(r, null);
-                    else set(r, { reino: r, kind: v as LocalSeat['kind'], name: s?.name || (v === 'human' ? `Jugador ${humans + 1}` : '') });
-                  }}
-                >
-                  <option value="none">Fuera de la guerra</option>
-                  <option value="human">Persona</option>
-                  {LEVELS.map((l) => (
-                    <option key={l} value={l}>
-                      Máquina · {BOT_LABEL[l]}
-                    </option>
-                  ))}
-                </select>
-                {s?.kind === 'human' && (
-                  <input value={s.name} maxLength={20} placeholder="Nombre" onChange={(e) => set(r, { ...s, name: e.target.value })} />
-                )}
-              </ReinoTile>
-            );
-          })}
-        </div>
-        <div className="setup-foot">
-          <button className="start" disabled={chosen.length < 2 || humans < 1} onClick={start}>
-            Empezar la guerra
-          </button>
-        </div>
-        {humans < 1 && <p className="hint">Hace falta al menos una persona.</p>}
       </div>
     </div>
   );
@@ -356,44 +351,32 @@ function Online({ onExit }: { onExit: () => void }) {
 
   if (!room || !me)
     return (
-      <div className="page">
-        <div className="sheet">
-          <button className="back" onClick={exit}>
-            ← Volver
+      <div className="setup">
+        <SetupHead title="Online" onBack={exit} />
+        <div className="online-entry">
+          <input className="big-input" value={name} maxLength={20} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" />
+          <button
+            className="start"
+            disabled={!connected}
+            onClick={async () => {
+              rememberName();
+              entered(await call('createRoom', { name }));
+            }}
+          >
+            Crear partida
           </button>
-          <h1>Jugar online</h1>
-          {!connected && <p className="hint">Conectando con el servidor…</p>}
-          <label className="field-label">
-            Tu nombre
-            <input value={name} maxLength={20} onChange={(e) => setName(e.target.value)} placeholder="Regente" />
-          </label>
-          <div className="online-choices">
-            <div>
-              <h3>Nueva partida</h3>
-              <button
-                className="start"
-                onClick={async () => {
-                  rememberName();
-                  entered(await call('createRoom', { name }));
-                }}
-              >
-                Crear partida
-              </button>
-            </div>
-            <div>
-              <h3>Unirse</h3>
-              <input value={code} maxLength={5} placeholder="CÓDIGO" onChange={(e) => setCode(e.target.value.toUpperCase())} />
-              <button
-                className="start"
-                disabled={code.trim().length < 5}
-                onClick={async () => {
-                  rememberName();
-                  entered(await call('joinRoom', { code, name }));
-                }}
-              >
-                Unirse
-              </button>
-            </div>
+          <div className="join-row">
+            <input className="big-input code" value={code} maxLength={5} placeholder="CÓDIGO" onChange={(e) => setCode(e.target.value.toUpperCase())} />
+            <button
+              className="start"
+              disabled={code.trim().length < 5 || !connected}
+              onClick={async () => {
+                rememberName();
+                entered(await call('joinRoom', { code, name }));
+              }}
+            >
+              Unirse
+            </button>
           </div>
           {error && <div className="error">{error}</div>}
         </div>
@@ -421,80 +404,77 @@ function Lobby({
   setError: (e: string) => void;
 }) {
   const host = room.hostId === me.id;
-  const [level, setLevel] = useState<BotLevel>('normal');
   const link = `${location.origin}/?sala=${room.code}`;
+  const [copied, setCopied] = useState(false);
   const run = async (ev: string, data?: unknown) => {
     const r = await call(ev, data);
     setError(r.ok ? '' : (r.error ?? 'Error'));
+    return r.ok;
   };
   const allReady = room.players.length >= 2 && room.players.every((p) => p.ready && p.reino);
+  const NEXT: Record<BotLevel, BotLevel> = { facil: 'normal', normal: 'dificil', dificil: 'facil' };
+  const share = async () => {
+    try {
+      if (navigator.share) await navigator.share({ title: 'REGIUM', url: link });
+      else await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* cancelado */
+    }
+  };
   return (
-    <div className="page">
-      <div className="sheet wide">
-        <button className="back" onClick={() => run('leave').then(onExit)}>
-          ← Salir
-        </button>
-        <h1>Partida {room.code}</h1>
-        <p className="lead">
-          <button className="link copy" onClick={() => navigator.clipboard?.writeText(link)} title="Copiar enlace">
-            {link}
-          </button>
-        </p>
-        <div className="reinos">
-          {REINOS.map((r) => {
-            const holder = room.players.find((p) => p.reino === r);
+    <div className="setup">
+      <SetupHead title={room.code} onBack={() => run('leave').then(onExit)}>
+        <CoinButton glyph="⤴" label={copied ? 'Copiado' : 'Invitar'} onClick={share} />
+      </SetupHead>
+      <div className="tronos">
+        {REINOS.map((r) => {
+          const holder = room.players.find((p) => p.reino === r);
+          if (!holder)
             return (
-              <ReinoTile key={r} reino={r} selected={!!holder} onClick={!holder ? () => run('lobby', { reino: r }) : undefined}>
-                {holder ? (
-                  <div className="holder">
-                    <b>{holder.id === me.id ? `${holder.name} (tú)` : holder.name}</b>
-                    <span className={holder.ready ? 'ok' : 'muted'}>
-                      {holder.bot ? `máquina · ${BOT_LABEL[holder.bot]}` : holder.ready ? 'preparado' : holder.online ? 'eligiendo…' : 'desconectado'}
-                    </span>
-                    {host && holder.bot && <button onClick={() => run('removeBot', { playerId: holder.id })}>Quitar</button>}
-                  </div>
-                ) : (
-                  <div className="holder">
-                    <span className="muted">Trono vacante</span>
-                    {!me.reino && <span>Toca para elegirlo</span>}
-                    {me.reino && <button onClick={() => run('lobby', { reino: r })}>Elegir este reino</button>}
-                    {host && room.players.length < 5 && (
-                      <button onClick={() => run('addBot', { reino: r, level })}>Añadir máquina</button>
-                    )}
-                  </div>
+              <Trono key={r} reino={r} state="libre" caption="Libre" onClick={() => run('lobby', { reino: r, ready: true })}>
+                {host && room.players.length < 5 && (
+                  <CoinButton glyph="+" label="Máquina" onClick={() => run('addBot', { reino: r, level: 'normal' })} />
                 )}
-              </ReinoTile>
+              </Trono>
             );
-          })}
-        </div>
-        <div className="setup-foot">
-          <label>
-            Tu nombre{' '}
-            <input defaultValue={me.name} maxLength={20} onBlur={(e) => e.target.value !== me.name && run('lobby', { name: e.target.value })} />
-          </label>
-          {host && (
-            <label>
-              Nivel de la máquina{' '}
-              <select value={level} onChange={(e) => setLevel(e.target.value as BotLevel)}>
-                {LEVELS.map((l) => (
-                  <option key={l} value={l}>
-                    {BOT_LABEL[l]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <button disabled={!me.reino} onClick={() => run('lobby', { ready: !me.ready })}>
-            {me.ready ? 'No estoy preparado' : 'Estoy preparado'}
-          </button>
-          {host && (
-            <button className="start" disabled={!allReady} onClick={() => run('start')}>
-              Iniciar la guerra
-            </button>
-          )}
-        </div>
-        {error && <div className="error">{error}</div>}
+          const mine = holder.id === me.id;
+          return (
+            <Trono
+              key={r}
+              reino={r}
+              state={mine ? 'mio' : 'ocupado'}
+              caption={holder.bot ? 'Máquina' : holder.name}
+              sub={holder.bot ? BOT_LABEL[holder.bot] : !holder.online ? 'desconectado' : holder.ready ? '✓' : '…'}
+              onClick={
+                host && holder.bot
+                  ? async () => {
+                      if (await run('removeBot', { playerId: holder.id })) run('addBot', { reino: r, level: NEXT[holder.bot!] });
+                    }
+                  : undefined
+              }
+            >
+              {host && holder.bot && <CoinButton glyph="✕" label="Quitar" onClick={() => run('removeBot', { playerId: holder.id })} />}
+            </Trono>
+          );
+        })}
       </div>
+      <div className="setup-foot">
+        <input
+          className="big-input"
+          defaultValue={me.name}
+          maxLength={20}
+          placeholder="Tu nombre"
+          onBlur={(e) => e.target.value !== me.name && run('lobby', { name: e.target.value })}
+        />
+        {host && (
+          <button className="start" disabled={!allReady} onClick={() => run('start')}>
+            Iniciar la guerra
+          </button>
+        )}
+      </div>
+      {error && <div className="error center">{error}</div>}
     </div>
   );
 }

@@ -64,7 +64,9 @@ export function Table({
 }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [panel, setPanel] = useState<'none' | 'rules' | 'log'>('none');
+  const [panel, setPanel] = useState<'none' | 'rules' | 'log' | 'menu'>('none');
+  /** En el móvil la mesa se divide en dos apartados. */
+  const [tab, setTab] = useState<'batalla' | 'reinos'>('batalla');
   const g = game;
   const n = g.players.length;
   const imp = imperial(g);
@@ -198,25 +200,37 @@ export function Table({
   const bidding = g.phase === 'BID' && myTurn;
 
   return (
-    <div className="table" style={{ ['--imp' as string]: REINO_INFO[imp].color }}>
+    <div className={`table tab-${tab}`} style={{ ['--imp' as string]: REINO_INFO[imp].color, ['--np' as string]: n }}>
       <header className="topbar">
-        <span className="brand">REGIUM</span>
-        <span className="war-n">
-          Guerra <b>{g.war + 1}</b>/{GUERRAS.length}
-        </span>
-        <span className="war-b">
-          {g.phase === 'PLAY' ? `Batalla ${Math.min(g.battle + 1, batallas(g))} de ${batallas(g)}` : `${batallas(g)} ${batallas(g) === 1 ? 'batalla' : 'batallas'}`}
-        </span>
-        <span className="imperial" title="Las tropas imperiales son el triunfo de esta guerra">
-          <img src={escudoImg(imp)} alt="" />
-          Imperial: <b>{REINO_INFO[imp].nombre}</b>
-        </span>
-        <nav>
-          <CoinButton glyph="¶" label="Crónica" onClick={() => setPanel(panel === 'log' ? 'none' : 'log')} />
-          <CoinButton glyph="§" label="Reglas" onClick={() => setPanel(panel === 'rules' ? 'none' : 'rules')} />
-          <CoinButton glyph="✕" label="Salir" onClick={onExit} />
-        </nav>
+        <img className="imp-escudo" src={escudoImg(imp)} alt="" title={`Imperial: ${REINO_INFO[imp].nombre}`} />
+        <div className="war-info">
+          <span className="war-n">
+            Guerra <b>{g.war + 1}</b>/{GUERRAS.length}
+          </span>
+          <span className="war-b">
+            {g.phase === 'PLAY' ? `Batalla ${Math.min(g.battle + 1, batallas(g))}/${batallas(g)}` : `${batallas(g)} ${batallas(g) === 1 ? 'batalla' : 'batallas'}`}
+          </span>
+        </div>
+        <CoinButton glyph="☰" label="Menú" onClick={() => setPanel(panel === 'menu' ? 'none' : 'menu')} />
       </header>
+
+      <section className="chips" style={{ ['--rivals' as string]: others.length }}>
+        {others.map((s) => {
+          const p = g.players[s];
+          return (
+            <button
+              key={s}
+              className={`chip ${g.turn === s && g.phase !== 'GAME_OVER' ? 'turn' : ''}`}
+              style={{ ['--rc' as string]: REINO_INFO[p.reino].color }}
+              onClick={() => setTab('reinos')}
+            >
+              <img src={g.emperor === s ? escudoImg(p.reino) : regenteImg(p.reino)} alt="" />
+              <span className="chip-bid">{p.bid === null ? '–' : `${p.won}/${p.bid}`}</span>
+              <span className="chip-cities">♜{p.ciudades}</span>
+            </button>
+          );
+        })}
+      </section>
 
       <section className="rivals" style={{ ['--rivals' as string]: others.length }}>
         {others.map((s) => (
@@ -226,7 +240,7 @@ export function Table({
 
       <section className="field" style={{ backgroundImage: `url(${pergaminoImg(g.players[g.emperor].reino)})` }}>
         <div className="field-shade" />
-        {bidding ? <BidPanel g={g} act={act} busy={busy} /> : resolve ? <ResolvePanel g={g} act={act} busy={busy} /> : <Battle g={g} name={name} />}
+        {bidding ? <BidPanel g={g} act={act} busy={busy} /> : resolve ? <ResolvePanel g={g} act={act} busy={busy} onAttack={() => setTab('reinos')} /> : <Battle g={g} name={name} />}
         <Status g={g} mySeat={mySeat} name={name} />
       </section>
 
@@ -241,7 +255,9 @@ export function Table({
               Ciudades <b>{me.ciudades}</b>/7
             </span>
           </div>
-          <Lugares player={me} size="lg" />
+          <div className="my-lugares">
+            <Lugares player={me} size="lg" />
+          </div>
           <div className="hand" style={{ ['--n' as string]: Math.max(me.hand.length, 1) }}>
             {me.hand.map((c) => {
               const ok = legal.some((x) => sameCard(x, c));
@@ -259,6 +275,25 @@ export function Table({
           </div>
           {error && <div className="error">{error}</div>}
         </section>
+      )}
+
+      <nav className="tabbar">
+        <button className={tab === 'batalla' ? 'on' : ''} onClick={() => setTab('batalla')}>
+          ⚔ Batalla
+        </button>
+        <button className={tab === 'reinos' ? 'on' : ''} onClick={() => setTab('reinos')}>
+          ♜ Reinos{resolve && (resolve.destroyCity.length > 0 || resolve.destroyTerritory.length > 0) ? ' •' : ''}
+        </button>
+      </nav>
+
+      {panel === 'menu' && (
+        <div className="overlay soft" onClick={() => setPanel('none')}>
+          <div className="menu-box framed" onClick={(e) => e.stopPropagation()}>
+            <CoinButton glyph="¶" label="Crónica" onClick={() => setPanel('log')} big />
+            <CoinButton glyph="§" label="Reglas" onClick={() => setPanel('rules')} big />
+            <CoinButton glyph="✕" label="Salir" onClick={onExit} big />
+          </div>
+        </div>
       )}
 
       <div className="toasts" aria-live="polite">
@@ -439,7 +474,7 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
   );
 }
 
-function ResolvePanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; busy: boolean }) {
+function ResolvePanel({ g, act, busy, onAttack }: { g: GameState; act: (a: Action) => void; busy: boolean; onAttack?: () => void }) {
   const o = resolveOptions(g);
   const left = g.actionsLeft;
   return (
@@ -449,15 +484,20 @@ function ResolvePanel({ g, act, busy }: { g: GameState; act: (a: Action) => void
       </div>
       <div className="resolve-actions">
         <CoinButton glyph="♜" label="Levantar ciudad" disabled={busy || !o.build} onClick={() => act({ type: 'build' })} big />
+        {(o.destroyCity.length > 0 || o.destroyTerritory.length > 0) && onAttack && (
+          <span className="mobile-only">
+            <CoinButton glyph="⚔" label="Atacar" onClick={onAttack} big />
+          </span>
+        )}
         <CoinButton glyph="✓" label={left > 0 ? 'Terminar' : 'Continuar'} disabled={busy} onClick={() => act({ type: 'pass' })} big />
       </div>
-      {(o.destroyCity.length > 0 || o.destroyTerritory.length > 0) && <div className="hint">O toca una carta rival para destruirla.</div>}
+
     </div>
   );
 }
 
 /** Botón redondo de bronce con un símbolo y su nombre debajo. */
-function CoinButton({ glyph, label, onClick, disabled, big }: { glyph: string; label: string; onClick: () => void; disabled?: boolean; big?: boolean }) {
+export function CoinButton({ glyph, label, onClick, disabled, big }: { glyph: string; label: string; onClick: () => void; disabled?: boolean; big?: boolean }) {
   return (
     <button className={`coin-btn ${big ? 'big' : ''}`} onClick={onClick} disabled={disabled} title={label} aria-label={label}>
       <span className="coin">{glyph}</span>

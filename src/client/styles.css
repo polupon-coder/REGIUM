@@ -489,6 +489,168 @@ button.start:hover:not(:disabled) {
   transform: rotateY(180deg);
 }
 
+/* ------------------------------------------------------------------ Preparación (simétrica) */
+.setup {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 12px 28px;
+}
+.setup .sheet {
+  width: min(760px, 100%);
+}
+.setup-head {
+  width: min(1100px, 100%);
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  align-items: center;
+}
+.setup-head h1 {
+  text-align: center;
+  color: var(--gold);
+  margin: 0;
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  letter-spacing: 0.08em;
+}
+.setup-head-right {
+  justify-self: end;
+}
+.tronos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 14px;
+  width: min(1100px, 100%);
+}
+.trono {
+  position: relative;
+  width: clamp(140px, 18vw, 200px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.trono-img {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: 0 8px 22px #000d;
+  outline: 3px solid transparent;
+  transition: transform 0.15s, filter 0.2s, outline-color 0.2s;
+}
+.trono-img img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 88 / 63;
+  object-fit: cover;
+}
+.trono-img:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.trono-img:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+.trono.libre .trono-img {
+  filter: grayscale(0.85) brightness(0.45);
+}
+.trono.libre .trono-img:hover:not(:disabled) {
+  filter: grayscale(0.3) brightness(0.8);
+}
+.trono.ocupado .trono-img {
+  outline-color: var(--rc);
+}
+.trono.mio .trono-img {
+  outline-color: var(--gold);
+}
+.trono-caption {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.15rem;
+  color: var(--gold-soft);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trono.libre .trono-caption {
+  color: var(--muted);
+}
+.trono-sub {
+  font-size: 0.9rem;
+  color: var(--muted);
+  min-height: 1.2em;
+}
+.trono-extra .coin-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+}
+.trono-extra .coin-label {
+  display: none;
+}
+.trono-extra {
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.trono-extra input {
+  width: 100%;
+  text-align: center;
+}
+.setup-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(340px, 100%);
+}
+.big-input {
+  width: 100%;
+  text-align: center;
+  font-size: 1.15rem;
+  padding: 10px;
+}
+.online-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: min(340px, 100%);
+  margin-top: 6vh;
+}
+.online-entry > button.start {
+  width: 100%;
+}
+.join-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+.join-row button.start {
+  min-width: 0;
+}
+.big-input.code {
+  letter-spacing: 0.2em;
+}
+.error.center {
+  text-align: center;
+}
+@media (max-width: 700px) {
+  .tronos {
+    gap: 14px 10px;
+  }
+  .trono {
+    width: calc((100vw - 24px - 10px) / 2);
+  }
+}
+
 /* ------------------------------------------------------------------ Mesa */
 .table {
   min-height: 100%;
@@ -508,10 +670,30 @@ button.start:hover:not(:disabled) {
   padding: 6px 2px;
   border-bottom: 1px solid #5a4630;
 }
-.topbar .brand {
-  color: var(--gold);
-  font-size: 1.35rem;
-  margin: 0;
+.imp-escudo {
+  height: 40px;
+  aspect-ratio: 88 / 63;
+  object-fit: cover;
+  outline: 2px solid var(--imp);
+}
+.war-info {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.topbar > .coin-btn {
+  margin-left: auto;
+}
+.chips,
+.tabbar,
+.mobile-only {
+  display: none;
+}
+.menu-box {
+  display: flex;
+  gap: 26px;
+  padding: 10px 22px;
 }
 .war-n b {
   color: var(--gold-soft);
@@ -1158,6 +1340,137 @@ button.tropa:disabled {
 }
 .sheet .rules {
   line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------ Mesa en el móvil: dos apartados */
+@media (max-width: 700px) {
+  .table {
+    padding-bottom: 70px;
+  }
+  .mobile-only {
+    display: inline-flex;
+  }
+  .topbar {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .war-info {
+    flex-direction: column;
+    gap: 0;
+    line-height: 1.2;
+  }
+  /* Rivales en fichas */
+  .chips {
+    display: grid;
+    grid-template-columns: repeat(var(--rivals, 4), 1fr);
+    gap: 6px;
+  }
+  .chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 2px 6px;
+    border: none;
+    border-top: 3px solid var(--rc);
+    background: #0f0b08b0;
+    box-shadow: none;
+  }
+  .chip.turn {
+    background: #3a2a16d0;
+    box-shadow: inset 0 0 0 1px var(--gold);
+  }
+  .chip img {
+    width: 100%;
+    max-width: 84px;
+    aspect-ratio: 88 / 63;
+    object-fit: cover;
+  }
+  .chip-bid {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--gold-soft);
+  }
+  .chip-cities {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  /* Barra de apartados */
+  .tabbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    background: #0d0907f2;
+    border-top: 1px solid var(--gold);
+  }
+  .tabbar button {
+    border: none;
+    background: none;
+    box-shadow: none;
+    padding: 14px 0;
+    font-family: 'IM Fell English', serif;
+    font-size: 1.2rem;
+    color: var(--muted);
+  }
+  .tabbar button.on {
+    color: var(--gold);
+    background: #2a1f14;
+  }
+  /* Apartado Batalla: campo y mano */
+  .tab-batalla .rivals,
+  .tab-batalla .my-lugares {
+    display: none;
+  }
+  /* Apartado Reinos: los lugares de todos, grandes */
+  .tab-reinos .chips,
+  .tab-reinos .field,
+  .tab-reinos .hand {
+    display: none;
+  }
+  .tab-reinos .rivals {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .tab-reinos .seat .meta {
+    display: block;
+  }
+  .tab-reinos .seat-face {
+    display: initial;
+  }
+  .tab-reinos .seat-face {
+    height: 44px;
+  }
+  .tab-reinos .lugares,
+  .tab-reinos .lugares.lg {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  /* Cartas grandes: en la mano, filas de hasta 4; en la batalla, todas en una fila */
+  .hand {
+    flex-wrap: wrap;
+    gap: 6px;
+    --card-w: min(32vw, calc((100vw - 24px - 3 * 6px) / min(var(--n), 4)));
+  }
+  .hand .tropa + .tropa {
+    margin-left: 0;
+  }
+  .battle {
+    flex-wrap: nowrap;
+    gap: 6px;
+    --card-w: min(30vw, calc((100vw - 28px - (var(--np) - 1) * 6px) / var(--np)));
+  }
+  .field {
+    min-height: auto;
+    padding: 12px 4px;
+  }
+  .mine-head {
+    gap: 10px 14px;
+  }
 }
 
 /* Pantalla en vertical: madera girada para que no se amplíe tanto */
