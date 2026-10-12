@@ -376,7 +376,6 @@ export function Table({
 /** Anuncio de una guerra: cuántas batallas y en qué reino tiene lugar. */
 function warNotice(g: GameState, name: (s: number) => string): Omit<Notice, 'id'> {
   const r: Reino = g.players[g.emperor].reino;
-  const nb = batallas(g);
   return {
     big: true,
     img: pergaminoImg(r),
@@ -384,7 +383,7 @@ function warNotice(g: GameState, name: (s: number) => string): Omit<Notice, 'id'
     title: `Guerra ${g.war + 1}`,
     text: (
       <>
-        {nb} {nb === 1 ? 'batalla' : 'batallas'} · <Rn r={r}>{REINO_INFO[r].nombre}</Rn>
+        <Rn r={r}>{REINO_INFO[r].nombre}</Rn>
       </>
     ),
   };
