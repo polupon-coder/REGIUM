@@ -36,11 +36,12 @@ interface Notice {
   title: ReactNode;
   text?: ReactNode;
   tone?: 'good' | 'bad';
+  /** Batalla terminada: todas las cartas jugadas y la ganadora. */
+  plays?: Play[];
+  winner?: number;
+  /** Resumen de una guerra (índice en history). */
+  summary?: number;
 }
-
-const BIG_MS = 2600;
-const SMALL_MS = 2800;
-const SUMMARY_MS = 9000;
 
 export function Table({
   game,
@@ -77,7 +78,6 @@ export function Table({
   useEffect(() => preloadCards(g.players.map((p) => p.reino)), [g.players.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ------------------------------------------------------------------ Ventanas flotantes
-  const [summary, setSummary] = useState<number | null>(null);
   const [bigQueue, setBigQueue] = useState<Notice[]>([]);
   const [toasts, setToasts] = useState<Notice[]>([]);
   const nextId = useRef(1);
@@ -93,6 +93,19 @@ export function Table({
     if (!p) {
       if (g.phase !== 'GAME_OVER' && g.battle === 0 && g.phase === 'BID') add(big, warNotice(g, name));
     } else {
+      // Batalla terminada: qué ha jugado cada uno y quién gana
+      if (g.lastTrick && JSON.stringify(g.lastTrick) !== JSON.stringify(p.lastTrick)) {
+        const w = g.lastTrick.winner;
+        const card = g.lastTrick.plays.find((x) => x.seat === w)!.card;
+        add(big, {
+          big: true,
+          tone: w === mySeat ? 'good' : undefined,
+          title: w === mySeat ? 'Ganas la batalla' : `Gana ${name(w)}`,
+          text: `con el ${card.valor} ${REINO_INFO[card.reino].nombre.replace('Reino ', '').toLowerCase()}`,
+          plays: g.lastTrick.plays,
+          winner: w,
+        });
+      }
       // Apuestas de los rivales
       if (g.war === p.war)
         g.players.forEach((pl, i) => {
@@ -155,29 +168,19 @@ export function Table({
       }
       // Fin de una guerra: resumen y anuncio de la siguiente
       if (g.war !== p.war && g.phase !== 'GAME_OVER') {
-        setSummary(g.history.length - 1);
+        add(big, { big: true, title: '', summary: g.history.length - 1 });
         add(big, warNotice(g, name));
       }
     }
     if (big.length) setBigQueue((q) => [...q, ...big]);
     const newWar = !!p && g.war !== p.war;
     if (small.length || newWar) setToasts((t) => [...(newWar ? [] : t), ...small].slice(-5));
-    for (const x of small) setTimeout(() => setToasts((t) => t.filter((y) => y.id !== x.id)), SMALL_MS);
   }, [g]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // El resumen va primero; después, las ventanas grandes de una en una
-  const currentBig = summary === null ? bigQueue[0] : undefined;
-  useEffect(() => {
-    if (summary === null) return;
-    const t = setTimeout(() => setSummary(null), SUMMARY_MS);
-    return () => clearTimeout(t);
-  }, [summary]);
-  useEffect(() => {
-    if (!currentBig) return;
-    const t = setTimeout(() => setBigQueue((q) => q.slice(1)), BIG_MS);
-    return () => clearTimeout(t);
-  }, [currentBig?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-  const showing = summary !== null || !!currentBig;
+  // Ventanas grandes de una en una; se cierran al tocarlas
+  const currentBig = bigQueue[0];
+  const closeBig = () => setBigQueue((q) => q.slice(1));
+  const showing = !!currentBig;
   useEffect(() => pauseSummary?.(showing), [showing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ------------------------------------------------------------------ Acciones
@@ -298,7 +301,7 @@ export function Table({
 
       <div className="toasts" aria-live="polite">
         {toasts.map((t) => (
-          <div key={t.id} className="toast">
+          <div key={t.id} className="toast" onClick={() => setToasts((x) => x.filter((y) => y.id !== t.id))}>
             {t.img && <img src={t.img} alt="" />}
             <div>
               <div className="toast-title">{t.title}</div>
@@ -308,17 +311,27 @@ export function Table({
         ))}
       </div>
 
-      {currentBig && g.phase !== 'GAME_OVER' && (
-        <div className="overlay soft" onClick={() => setBigQueue((q) => q.slice(1))}>
+      {currentBig && g.phase !== 'GAME_OVER' && currentBig.summary !== undefined && g.history[currentBig.summary] && (
+        <WarSummary g={g} index={currentBig.summary} name={name} onClose={closeBig} />
+      )}
+      {currentBig && g.phase !== 'GAME_OVER' && currentBig.summary === undefined && (
+        <div className="overlay soft" onClick={closeBig}>
           <div className={`notice framed ${currentBig.tone ?? ''} ${currentBig.imgKind ?? ''}`} role="status">
             {currentBig.img && <img src={currentBig.img} alt="" />}
+            {currentBig.plays && (
+              <div className="notice-plays">
+                {currentBig.plays.map((pl) => (
+                  <div key={pl.seat} className={`played ${pl.seat === currentBig.winner ? 'winner' : 'loser'}`}>
+                    <Tropa card={pl.card} />
+                    <span className="who">{name(pl.seat)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             <h2>{currentBig.title}</h2>
             {currentBig.text && <p>{currentBig.text}</p>}
           </div>
         </div>
-      )}
-      {summary !== null && g.history[summary] && g.phase !== 'GAME_OVER' && (
-        <WarSummary g={g} index={summary} name={name} onClose={() => setSummary(null)} />
       )}
       {g.phase === 'GAME_OVER' && <GameOver g={g} name={name} onExit={onExit} />}
       {panel === 'rules' && (
@@ -577,7 +590,7 @@ function GameOver({ g, name, onExit }: { g: GameState; name: (s: number) => stri
         <p>
           {g.endReason === 'ciudades'
             ? `Siete ciudades levantadas en la guerra ${g.war + 1}.`
-            : 'Tras las 19 guerras, nadie levantó siete ciudades: manda quien más tiene.'}
+            : `Tras las ${GUERRAS.length} guerras, nadie levantó siete ciudades: manda quien más tiene.`}
         </p>
         <div className="ranking">
           {ranking.map(({ p, i }) => (

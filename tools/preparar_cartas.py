@@ -19,7 +19,17 @@ def recorte(path):
     card = im.crop((l, t, l + round(cw * sx), t + round(ch * sy))).convert("RGBA")
     return card, sx
 
-def niveles(card):
+# Nivelado entre reinos: el amarillo se apaga un poco y los demás se aclaran (gamma por reino)
+SATUR_REINO = {"amarillo": 0.86}
+GAMMA_REINO = {"amarillo": 1.14, "rojo": 0.86, "verde": 0.78, "azul": 1.0, "morado": 0.8}
+
+def reino_de(name):
+    for r in GAMMA_REINO:
+        if f"-{r}" in name:
+            return r
+    return None
+
+def niveles(card, gamma=1.0, satur=1.0):
     """Quita el velo gris: lleva el negro de la carta a negro de verdad (punto negro en el
     percentil 0,5) y estira los blancos si la carta no llega a ellos, con una curva suave."""
     import numpy as np
@@ -29,7 +39,10 @@ def niveles(card):
     bp = max(0.0, float(np.percentile(L, 0.5)) - 4)
     wp = max(float(np.percentile(L, 99.7)), 200.0)
     x = np.clip((rgb - bp) / (wp - bp), 0, 1)
-    x = x ** 1.08  # un poco más de profundidad en las sombras
+    x = x ** (1.08 * gamma)  # un poco más de profundidad en las sombras
+    if satur != 1.0:
+        gray = x.mean(axis=2, keepdims=True)
+        x = gray + (x - gray) * satur
     out = np.concatenate([x * 255, alpha], axis=2)
     return Image.fromarray(np.clip(out + 0.5, 0, 255).astype("uint8"), "RGBA")
 
@@ -68,7 +81,8 @@ def main(src, dst):
         long_side = 1400 if name == "dorso-regium" else 900 if big else 520
         scale = long_side / max(card.size)
         card = card.resize((round(card.width * scale), round(card.height * scale)), Image.LANCZOS)
-        card = niveles(card)
+        r = reino_de(name)
+        card = niveles(card, GAMMA_REINO.get(r, 1.0), SATUR_REINO.get(r, 1.0))
         card = esquinas(card, round(RADIUS_MM * s * scale))
         card.save(os.path.join(dst, name + ".webp"), quality=82, method=6)
     marco_escudo(dst)

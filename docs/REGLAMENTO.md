@@ -26,8 +26,7 @@ versión digital la pantalla lo muestra siempre.
 
 ## Las guerras
 
-La partida tiene 19 guerras. La 1.ª tiene 1 batalla, la 2.ª 2 batallas… hasta 10, y luego se baja:
-9, 8… hasta 1. En cada guerra se reparten a cada jugador tantas tropas como batallas tiene.
+La partida tiene 10 guerras. La 1.ª tiene 1 batalla, la 2.ª 2 batallas… y la 10.ª, 10 batallas. En cada guerra se reparten a cada jugador tantas tropas como batallas tiene.
 
 ### 1. Estrategia (apuesta)
 
@@ -60,7 +59,7 @@ Las victorias que no se puedan o no se quieran usar se pierden. Quien **falla** 
 ## Final
 
 - Gana quien levanta su **7.ª ciudad**, en ese mismo momento (aunque otros no hayan resuelto todavía).
-- Si nadie lo consigue al terminar la 19.ª guerra, gana quien tenga más ciudades; si empatan, quien tenga
+- Si nadie lo consigue al terminar la 10.ª guerra, gana quien tenga más ciudades; si empatan, quien tenga
   más territorios. Si aún empatan, comparten la victoria.
 
 ## Modos de la versión digital

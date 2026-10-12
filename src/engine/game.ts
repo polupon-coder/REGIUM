@@ -12,8 +12,8 @@ export const REINO_INFO: Record<Reino, { nombre: string; escudo: string; color: 
   morado: { nombre: 'Reino Morado', escudo: 'Elefante', color: '#6e2a85' },
 };
 
-/** Número de batallas de cada guerra: 1, 2 … 10, 9 … 1 (19 guerras). */
-export const GUERRAS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+/** Número de batallas de cada guerra: 1, 2 … 10 (10 guerras). */
+export const GUERRAS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 export const LUGARES = 7;
 export const CIUDADES_PARA_GANAR = 7;
 
@@ -490,7 +490,7 @@ function endWar(g: GameState) {
     g.winners = g.players.map((p, i) => i).filter((i) => score(g.players[i]) === best);
     g.phase = 'GAME_OVER';
     g.endReason = 'guerras';
-    log(g, `Terminan las 19 guerras. ${g.winners.map((i) => g.players[i].name).join(' y ')} ${g.winners.length > 1 ? 'comparten' : 'se lleva'} la corona.`);
+    log(g, `Terminan las ${GUERRAS.length} guerras. ${g.winners.map((i) => g.players[i].name).join(' y ')} ${g.winners.length > 1 ? 'comparten' : 'se lleva'} la corona.`);
     return;
   }
   g.war++;

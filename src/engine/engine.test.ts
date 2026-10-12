@@ -41,9 +41,8 @@ describe('preparación', () => {
     const reinos = new Set(['rojo', 'verde', 'azul']);
     expect(g.players.flatMap((p) => p.hand).every((x) => reinos.has(x.reino))).toBe(true);
   });
-  it('19 guerras: 1…10…1', () => {
-    expect(GUERRAS).toHaveLength(19);
-    expect(GUERRAS[9]).toBe(10);
+  it('10 guerras: de 1 a 10 batallas', () => {
+    expect(GUERRAS).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   });
   it('rechaza reinos repetidos y más de 5 jugadores', () => {
     expect(() => createGame([{ name: 'a', reino: 'rojo' }, { name: 'b', reino: 'rojo' }], 1)).toThrow();

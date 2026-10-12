@@ -1,6 +1,6 @@
 # REGIUM — versión digital
 
-Juego de cartas de 2 a 5 jugadores: cinco reinos, diecinueve guerras y siete ciudades para reinar
+Juego de cartas de 2 a 5 jugadores: cinco reinos, diez guerras y siete ciudades para reinar
 sobre todos. El servidor (o el navegador, en las partidas locales) aplica todas las reglas.
 
 - **Reglas:** [`docs/REGLAMENTO.md`](docs/REGLAMENTO.md) es la única fuente de verdad, con las aclaraciones del autor.

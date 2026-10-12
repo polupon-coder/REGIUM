@@ -1045,6 +1045,8 @@ button.tropa:disabled {
   pointer-events: none;
 }
 .toast {
+  pointer-events: auto;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1104,6 +1106,25 @@ button.tropa:disabled {
     transform: scale(0.85);
     opacity: 0;
   }
+}
+.notice-plays {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: flex-end;
+  padding-top: 14px;
+  --card-w: min(110px, calc((90vw - 60px - (var(--np) - 1) * 8px) / var(--np)));
+}
+.notice .notice-plays img {
+  width: 100%;
+  box-shadow: none;
+  border-radius: 0;
+}
+.notice-plays .played.loser .tropa {
+  filter: brightness(0.55);
+}
+.notice-plays .played.winner .tropa {
+  transform: translateY(-14px) scale(1.08);
 }
 .notice img {
   width: min(420px, 80vw);

@@ -66,7 +66,7 @@ function scheduleBots(room: Room) {
   const justClosed = g?.phase === 'PLAY' && g.trick.length === 0 && g.lastTrick;
   // y mucho más al empezar una guerra nueva, para que se lea el resumen y el anuncio
   const newWar = g?.phase === 'BID' && g.history.length > 0 && g.players.every((p) => p.bid === null);
-  const delay = newWar ? BOT_DELAY * 9 : justClosed ? BOT_DELAY * 1.8 : BOT_DELAY;
+  const delay = newWar ? BOT_DELAY * 3 : justClosed ? BOT_DELAY * 1.8 : BOT_DELAY;
   const timer = setTimeout(() => {
     botTimers.delete(room.code);
     if (!allRooms().includes(room)) return; // partida borrada entretanto
