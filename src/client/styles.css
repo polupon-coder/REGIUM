@@ -2188,23 +2188,21 @@ button.seal:hover:not(:disabled) {
   }
 }
 
-/* Textos sobre el papiro claro: tinta oscura */
+/* Textos sobre el papiro claro: tinta oscura, sin sombreado claro */
 .field .status,
 .field .bid-panel .panel-title,
 .field .played .who {
   color: #2b1a0b;
-  text-shadow: 0 0 6px #f6e9c8, 0 0 2px #f6e9c8;
-  font-weight: 600;
+  text-shadow: none;
+  font-weight: 700;
 }
 .field .status.mine {
   color: #5a1d0c;
 }
 .field .played .who {
-  padding: 1px 8px;
-  background: color-mix(in srgb, var(--rc) 62%, transparent);
-  color: #fff;
-  text-shadow: 0 1px 2px #0008;
+  white-space: nowrap;
+  font-size: clamp(0.8rem, 3vw, 1.08rem);
 }
 .field .played .who span[style] {
-  color: #fff !important;
+  color: var(--tinta) !important;
 }
