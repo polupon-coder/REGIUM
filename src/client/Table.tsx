@@ -26,15 +26,15 @@ export const TEXTO_REINO: Record<Reino, string> = {
   rojo: '#e2665c',
   verde: '#9cc865',
   amarillo: '#e3c64e',
-  azul: '#5fb6d6',
+  azul: '#6fa6e0',
   morado: '#bb86d8',
 };
 /* Tinta oscura del color de cada reino para escribir sobre el papiro */
 const TINTA_REINO: Record<Reino, string> = {
   rojo: '#5e0c04',
   verde: '#1a3d06',
-  amarillo: '#4f3700',
-  azul: '#082c52',
+  amarillo: '#7a5600',
+  azul: '#17487e',
   morado: '#3b0c50',
 };
 const Rn = ({ r, children }: { r: Reino; children: ReactNode }) => <span style={{ color: TEXTO_REINO[r] }}>{children}</span>;
