@@ -159,15 +159,10 @@ export function Table({
       }
     }
     if (big.length) setBigQueue((q) => [...q, ...big]);
-    if (small.length) setToasts((t) => [...t, ...small].slice(-5));
+    const newWar = !!p && g.war !== p.war;
+    if (small.length || newWar) setToasts((t) => [...(newWar ? [] : t), ...small].slice(-5));
+    for (const x of small) setTimeout(() => setToasts((t) => t.filter((y) => y.id !== x.id)), SMALL_MS);
   }, [g]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Los avisos pequeños desaparecen solos
-  useEffect(() => {
-    if (!toasts.length) return;
-    const t = setTimeout(() => setToasts((x) => x.slice(1)), SMALL_MS);
-    return () => clearTimeout(t);
-  }, [toasts]);
 
   // El resumen va primero; después, las ventanas grandes de una en una
   const currentBig = summary === null ? bigQueue[0] : undefined;
@@ -218,9 +213,9 @@ export function Table({
           Imperial: <b>{REINO_INFO[imp].nombre}</b>
         </span>
         <nav>
-          <button onClick={() => setPanel(panel === 'log' ? 'none' : 'log')}>Crónica</button>
-          <button onClick={() => setPanel(panel === 'rules' ? 'none' : 'rules')}>Reglas</button>
-          <button onClick={onExit}>Salir</button>
+          <CoinButton glyph="¶" label="Crónica" onClick={() => setPanel(panel === 'log' ? 'none' : 'log')} />
+          <CoinButton glyph="§" label="Reglas" onClick={() => setPanel(panel === 'rules' ? 'none' : 'rules')} />
+          <CoinButton glyph="✕" label="Salir" onClick={onExit} />
         </nav>
       </header>
 
@@ -437,13 +432,13 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
       <div className="panel-title">¿Cuántas batallas vas a ganar?</div>
       <div className="bids">
         {Array.from({ length: n + 1 }, (_, b) => (
-          <button key={b} className="coin" disabled={busy || !allowed.includes(b)} onClick={() => act({ type: 'bid', n: b })}>
+          <button key={b} className="gem" disabled={busy || !allowed.includes(b)} onClick={() => act({ type: 'bid', n: b })}>
             {b}
           </button>
         ))}
       </div>
       <div className="hint">
-        Apostado por los demás: {sum} de {n}.{last && ` Eres el último: no puedes apostar ${n - sum}.`}
+        Apostado por los demás: {sum} de {n}.{last && n - sum >= 0 && ` Eres el último: no puedes apostar ${n - sum}.`}
       </div>
     </div>
   );
@@ -458,18 +453,24 @@ function ResolvePanel({ g, act, busy }: { g: GameState; act: (a: Action) => void
         Te {left === 1 ? 'queda' : 'quedan'} <b className="num">{left}</b> {left === 1 ? 'victoria' : 'victorias'}
       </div>
       <div className="resolve-actions">
-        <button className="primary" disabled={busy || !o.build} onClick={() => act({ type: 'build' })}>
-          Levantar una ciudad
-        </button>
-        <button disabled={busy} onClick={() => act({ type: 'pass' })}>
-          {left > 0 ? 'Terminar' : 'Continuar'}
-        </button>
+        <CoinButton glyph="♜" label="Levantar ciudad" disabled={busy || !o.build} onClick={() => act({ type: 'build' })} big />
+        <CoinButton glyph="✓" label={left > 0 ? 'Terminar' : 'Continuar'} disabled={busy} onClick={() => act({ type: 'pass' })} big />
       </div>
       <div className="hint">
         {o.destroyCity.length > 0 && 'O toca una ciudad rival para arrasarla (1 victoria). '}
         {o.destroyTerritory.length > 0 && 'Un territorio rival se conquista con 2 victorias.'}
       </div>
     </div>
+  );
+}
+
+/** Botón redondo de bronce con un símbolo y su nombre debajo. */
+function CoinButton({ glyph, label, onClick, disabled, big }: { glyph: string; label: string; onClick: () => void; disabled?: boolean; big?: boolean }) {
+  return (
+    <button className={`coin-btn ${big ? 'big' : ''}`} onClick={onClick} disabled={disabled} title={label} aria-label={label}>
+      <span className="coin">{glyph}</span>
+      <span className="coin-label">{label}</span>
+    </button>
   );
 }
 
