@@ -137,6 +137,19 @@ export function Table({
               ),
             });
         });
+      // Estrategia fallada
+      if (mySeat !== null && g.history.length > p.history.length) {
+        const w = g.history[g.history.length - 1];
+        if (w.bids[mySeat] !== w.won[mySeat])
+          add(big, {
+            big: true,
+            tone: 'bad',
+            img: escudoImg(g.players[mySeat].reino),
+            imgKind: 'regente',
+            title: 'Has fallado tu estrategia',
+            text: `Apostaste ${w.bids[mySeat]} y ganaste ${w.won[mySeat]}.`,
+          });
+      }
       // Lo que gano o pierdo yo
       if (mySeat !== null) {
         const a = p.players[mySeat];
