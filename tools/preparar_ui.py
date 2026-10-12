@@ -37,6 +37,20 @@ def main(src, dst):
     card = card.crop((round(w * 0.075), round(h * 0.06), round(w * 0.925), round(h * 0.94)))
     card = card.resize((900, round(900 * card.height / card.width)), Image.LANCZOS)
     card.save(os.path.join(dst, "portada.webp"), quality=84)
+    # Placa de metal para los botones de iniciar: el fondo blanco pasa a transparente
+    import numpy as np
+    pl = Image.open(os.path.join(src, "placa.webp")).convert("RGB")
+    a = np.asarray(pl).astype(np.int16)
+    ys, xs = np.where(a.min(axis=2) < 200)
+    pl = pl.crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1)).convert("RGBA")
+    a = np.asarray(pl).astype(np.float32)
+    light = a[..., :3].min(axis=2)
+    alpha = np.clip((235 - light) / 35, 0, 1) * 255
+    a[..., 3] = alpha
+    pl = Image.fromarray(a.astype("uint8"), "RGBA")
+    pl = pl.resize((pl.width // 2, pl.height // 2), Image.LANCZOS)
+    pl.save(os.path.join(dst, "placa.webp"), quality=88)
+    print("placa", pl.size)
     # Marco simple (botones de iniciar)
     f2 = Image.open(os.path.join(src, "marco-simple.webp")).convert("RGB").crop((46, 78, 1403, 976))
     f2.resize((f2.width // 2, f2.height // 2), Image.LANCZOS).save(os.path.join(dst, "marco-simple.webp"), quality=85)

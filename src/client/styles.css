@@ -303,16 +303,18 @@ select {
 
 /* Botones de iniciar: marco simple de bronce */
 button.start {
-  border: 14px solid transparent;
-  border-image: url('/ui/marco-simple.webp') 45 fill / 14px stretch;
+  border: 13px solid transparent;
+  border-width: 13px 30px;
+  border-image: url('/ui/placa.webp') 42 76 fill / 13px 30px stretch;
   border-radius: 0;
   background: none;
   box-shadow: none;
-  padding: 6px 14px;
-  min-width: 240px;
+  padding: 8px 6px;
+  min-width: 250px;
   font-family: 'IM Fell English', serif;
-  font-size: 1.2rem;
-  color: var(--gold-soft);
+  font-size: 1.25rem;
+  color: #f3dfa6;
+  text-shadow: 0 1px 2px #000, 0 0 8px #000;
   filter: drop-shadow(0 4px 10px #000c);
 }
 button.start:hover:not(:disabled) {
