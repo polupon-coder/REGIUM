@@ -600,7 +600,7 @@ function WarSummary({ g, index, name, onClose }: { g: GameState; index: number; 
             );
           })}
         </div>
-        <button className="primary" onClick={onClose}>
+        <button className="start" onClick={onClose}>
           Continuar
         </button>
       </div>
@@ -641,7 +641,7 @@ function GameOver({ g, name, onExit }: { g: GameState; name: (s: number) => stri
           ))}
         </div>
         <Chart g={g} name={name} />
-        <button className="primary" onClick={onExit}>
+        <button className="start" onClick={onExit}>
           Volver al inicio
         </button>
       </div>
