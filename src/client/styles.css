@@ -1914,3 +1914,21 @@ input {
     width: 380px;
   }
 }
+
+/* Portada en ordenador: la mitad derecha lleva el pergamino de fondo y los botones encima */
+@media (min-width: 701px) {
+  .home-content {
+    align-self: stretch;
+    justify-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/ui/pergamino-portada.webp') center / contain no-repeat;
+  }
+}
+@media (min-width: 701px) {
+  .home-content .menu button.start {
+    width: min(340px, 22vw);
+    font-size: clamp(0.9rem, 1.15vw, 1.2rem);
+  }
+}
