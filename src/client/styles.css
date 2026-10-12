@@ -1807,3 +1807,84 @@ input {
     width: var(--tw);
   }
 }
+
+/* ------------------------------------------------------------------ Ordenador: batalla a la izquierda, reinos a la derecha */
+@media (min-width: 701px) {
+  .table {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(340px, 1fr);
+    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-areas:
+      'top top'
+      'field head'
+      'field mylug'
+      'field rivals'
+      'hand rivals';
+    column-gap: 18px;
+    row-gap: 10px;
+    height: 100vh;
+    --card-w: clamp(64px, min(8.5vw, 15vh), 150px);
+  }
+  .topbar {
+    grid-area: top;
+  }
+  .me-chip-row,
+  .chips,
+  .tabbar {
+    display: none !important;
+  }
+  .field {
+    grid-area: field;
+    min-height: 0;
+  }
+  .mine {
+    display: contents;
+  }
+  .mine-head {
+    grid-area: head;
+    justify-content: flex-start;
+    padding: 6px 8px;
+    gap: 12px;
+    background: linear-gradient(#0006, #0006), var(--rc);
+  }
+  .mine-head .mine-face {
+    display: initial;
+  }
+  .mine-head .pname,
+  .mine-head .pname * {
+    color: #fff !important;
+  }
+  .hand {
+    grid-area: hand;
+    padding-bottom: 8px;
+  }
+  .my-lugares {
+    grid-area: mylug;
+    padding: 8px;
+    margin-top: -10px;
+    background: #0f0b0899;
+  }
+  .rivals {
+    grid-area: rivals;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    align-self: start;
+    max-height: 100%;
+  }
+  /* Lugares en filas de 4, sin huecos de reserva */
+  .my-lugares .lugares,
+  .rivals .lugares {
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+    gap: 6px;
+  }
+  .my-lugares .lugar.reserva,
+  .rivals .lugar.reserva {
+    display: none;
+  }
+  .mine .error {
+    grid-column: 1;
+  }
+}
