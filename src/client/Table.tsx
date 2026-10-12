@@ -288,9 +288,9 @@ export function Table({
             <img src={regenteImg(me.reino)} alt="" />
           </div>
           <div className="me-side right">
-            <span>⚔ {me.bid === null ? '–' : `${me.won}/${me.bid}`}</span>
-            <span>
-              ♜ <b>{me.ciudades}</b>/7
+            <span className="chip-line">
+              <span className="chip-bid">⚔ {me.bid === null ? '–' : `${me.won}/${me.bid}`}</span>
+              <span className="chip-cities">♜ {me.ciudades}</span>
             </span>
           </div>
         </section>
@@ -307,10 +307,10 @@ export function Table({
               onClick={() => setTab('reinos')}
             >
               <img src={regenteImg(p.reino)} alt="" />
-              <span className="chip-bid">{p.bid === null ? '–' : `${p.won}/${p.bid}`}</span>
-              <span className="chip-cities">
-                ♜{p.ciudades}
-                {g.emperor === s && <span className="crown"> ♛</span>}
+              <span className="chip-line">
+                <span className="chip-bid">⚔ {p.bid === null ? '–' : `${p.won}/${p.bid}`}</span>
+                <span className="chip-cities">♜ {p.ciudades}</span>
+                {g.emperor === s && <span className="crown">♛</span>}
               </span>
             </button>
           );

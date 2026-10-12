@@ -43,6 +43,7 @@ body,
 }
 body {
   margin: 0;
+  text-transform: uppercase;
   font-variant-numeric: lining-nums;
   /* Mesa de madera con viñeta */
   background-color: var(--bg);
@@ -70,6 +71,7 @@ button,
 input,
 select {
   font: inherit;
+  text-transform: inherit;
   color: inherit;
 }
 button {
@@ -1444,6 +1446,12 @@ button.tropa:disabled {
   gap: 4px;
   font-size: 0.95rem;
 }
+/* Los textos largos (reglas y crónica) se leen mejor en minúsculas */
+.rules,
+.log,
+input {
+  text-transform: none;
+}
 .rules h3 {
   color: var(--gold);
   margin-top: 1.1em;
@@ -1554,6 +1562,13 @@ button.tropa:disabled {
     max-width: 84px;
     aspect-ratio: 88 / 63;
     object-fit: cover;
+  }
+  .chip-line {
+    display: flex;
+    font-size: 1.05rem;
+    gap: 10px;
+    align-items: baseline;
+    white-space: nowrap;
   }
   .chip-bid {
     font-size: 1.15rem;
