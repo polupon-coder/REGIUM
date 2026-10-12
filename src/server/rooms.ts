@@ -135,7 +135,7 @@ function addPlayer(room: Room, name: string): LobbyPlayer {
     token: randomBytes(16).toString('hex'),
     name: cleanName(name),
     reino: freeReino(room),
-    ready: false,
+    ready: true,
   };
   room.players.push(p);
   return p;
@@ -165,7 +165,7 @@ export function updateLobby(room: Room, token: string, patch: { name?: string; r
     if (!REINOS.includes(patch.reino)) throw new RoomError('Reino no válido.');
     if (room.players.some((o) => o !== p && o.reino === patch.reino)) throw new RoomError('Ese reino ya tiene regente.');
     p.reino = patch.reino;
-    p.ready = false;
+    p.ready = true;
   }
   if (patch.ready !== undefined) p.ready = !!patch.ready;
   save(room);
@@ -185,7 +185,7 @@ export function startGame(room: Room, token: string) {
   if (room.game) throw new RoomError('La partida ya ha empezado.');
   if (p.id !== room.hostId) throw new RoomError('Solo quien creó la partida puede iniciarla.');
   if (room.players.length < 2) throw new RoomError('Hacen falta al menos 2 regentes.');
-  if (room.players.some((x) => !x.ready || !x.reino)) throw new RoomError('Todos los regentes deben estar preparados.');
+  if (room.players.some((x) => !x.reino)) throw new RoomError('Todos los regentes deben elegir reino.');
   // El orden de la mesa es el de los reinos (rojo, verde, amarillo, azul, morado)
   const order = [...room.players].sort((a, b) => REINOS.indexOf(a.reino!) - REINOS.indexOf(b.reino!));
   order.forEach((x, i) => (x.seat = i));

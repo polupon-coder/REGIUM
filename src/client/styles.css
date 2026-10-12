@@ -510,6 +510,9 @@ button.start:hover:not(:disabled) {
   align-items: center;
 }
 .setup-head h1 {
+  font-family: 'EB Garamond', serif;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
   text-align: center;
   color: var(--gold);
   margin: 0;
@@ -557,10 +560,10 @@ button.start:hover:not(:disabled) {
   transform: translateY(-3px);
 }
 .trono.libre .trono-img {
-  filter: grayscale(0.85) brightness(0.45);
+  filter: brightness(0.8);
 }
 .trono.libre .trono-img:hover:not(:disabled) {
-  filter: grayscale(0.3) brightness(0.8);
+  filter: brightness(1.1);
 }
 .trono.mio .trono-img {
   outline-color: var(--gold);

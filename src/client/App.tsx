@@ -13,7 +13,7 @@ import {
   type GameState,
   type Reino,
 } from '../engine';
-import { PORTADA, pergaminoImg, preloadCards, RegenteCard, regenteImg } from './cards';
+import { PORTADA, pergaminoImg, preloadCards, RegenteCard, regenteImg, escudoImg } from './cards';
 import { Rules } from './Rules';
 import { call, forgetSession, lastCode, loadSessions, saveSession, socket, tabSessions, type PublicRoom } from './socket';
 import { CoinButton, Table, type SeatMeta } from './Table';
@@ -85,7 +85,7 @@ function Trono({
   return (
     <div className={`trono ${state}`} style={{ ['--rc' as string]: REINO_INFO[reino].color }}>
       <button className="trono-img" onClick={onClick} disabled={!onClick} aria-label={REINO_INFO[reino].nombre}>
-        <img src={regenteImg(reino)} alt="" draggable={false} />
+        <img src={state === 'libre' ? escudoImg(reino) : regenteImg(reino)} alt="" draggable={false} />
       </button>
       <div className="trono-caption">{caption}</div>
       <div className="trono-sub">{sub ?? '\u00a0'}</div>
@@ -404,7 +404,7 @@ function Lobby({
     setError(r.ok ? '' : (r.error ?? 'Error'));
     return r.ok;
   };
-  const allReady = room.players.length >= 2 && room.players.every((p) => p.ready && p.reino);
+  const allReady = room.players.length >= 2 && room.players.every((p) => p.reino);
   const NEXT: Record<BotLevel, BotLevel> = { facil: 'normal', normal: 'dificil', dificil: 'facil' };
   const share = async () => {
     try {
@@ -439,7 +439,7 @@ function Lobby({
               reino={r}
               state={mine ? 'mio' : 'ocupado'}
               caption={holder.bot ? 'Máquina' : holder.name}
-              sub={holder.bot ? BOT_LABEL[holder.bot] : !holder.online ? 'desconectado' : holder.ready ? '✓' : '…'}
+              sub={holder.bot ? BOT_LABEL[holder.bot] : !holder.online ? 'desconectado' : undefined}
               onClick={
                 host && holder.bot
                   ? async () => {
