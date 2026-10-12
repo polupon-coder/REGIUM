@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   applyAction,
-  BOT_LABEL,
   chooseAction,
   createGame,
   REINO_INFO,
@@ -16,10 +15,9 @@ import {
 import { PORTADA, pergaminoImg, preloadCards, RegenteCard, regenteImg, escudoImg } from './cards';
 import { Rules } from './Rules';
 import { call, forgetSession, lastCode, loadSessions, saveSession, socket, tabSessions, type PublicRoom } from './socket';
-import { CoinButton, Table, type SeatMeta } from './Table';
+import { CoinButton, Table, TEXTO_REINO, type SeatMeta } from './Table';
 
 type Screen = 'home' | 'local-setup' | 'local' | 'online' | 'rules';
-const LEVELS: BotLevel[] = ['facil', 'normal', 'dificil'];
 const codeFromUrl = () => new URLSearchParams(location.search).get('sala')?.toUpperCase() ?? null;
 
 export function App() {
@@ -83,7 +81,7 @@ function Trono({
   children?: React.ReactNode;
 }) {
   return (
-    <div className={`trono ${state}`} style={{ ['--rc' as string]: REINO_INFO[reino].color }}>
+    <div className={`trono ${state}`} style={{ ['--rc' as string]: REINO_INFO[reino].color, ['--tc' as string]: TEXTO_REINO[reino] }}>
       <button className="trono-img" onClick={onClick} disabled={!onClick} aria-label={REINO_INFO[reino].nombre}>
         <img src={state === 'libre' ? escudoImg(reino) : regenteImg(reino)} alt="" draggable={false} />
       </button>
@@ -151,7 +149,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
     saveLocal({ game, seats: chosen.map((s, i) => ({ name: players[i].name, bot: s.kind === 'human' ? null : s.kind })) });
     onStart();
   };
-  const CYCLE: (LocalSeat['kind'] | null)[] = [null, 'human', 'facil', 'normal', 'dificil'];
+  const CYCLE: (LocalSeat['kind'] | null)[] = [null, 'human', 'normal'];
   const cycle = (r: Reino) => {
     const cur = seats[r]?.kind ?? null;
     const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
@@ -168,8 +166,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
               key={r}
               reino={r}
               state={!s ? 'libre' : s.kind === 'human' ? 'mio' : 'ocupado'}
-              caption={!s ? 'Libre' : s.kind === 'human' ? 'Persona' : 'Máquina'}
-              sub={s && s.kind !== 'human' ? BOT_LABEL[s.kind] : undefined}
+              caption={!s ? 'Libre' : s.kind === 'human' ? 'Persona' : 'Bot'}
               onClick={() => cycle(r)}
             >
               {s?.kind === 'human' && (
@@ -405,7 +402,6 @@ function Lobby({
     return r.ok;
   };
   const allReady = room.players.length >= 2 && room.players.every((p) => p.reino);
-  const NEXT: Record<BotLevel, BotLevel> = { facil: 'normal', normal: 'dificil', dificil: 'facil' };
   const share = async () => {
     try {
       if (navigator.share) await navigator.share({ title: 'REGIUM', url: link });
@@ -428,7 +424,7 @@ function Lobby({
             return (
               <Trono key={r} reino={r} state="libre" caption="Libre" onClick={() => run('lobby', { reino: r, ready: true })}>
                 {host && room.players.length < 5 && (
-                  <CoinButton glyph="+" label="Máquina" onClick={() => run('addBot', { reino: r, level: 'normal' })} />
+                  <CoinButton glyph="+" label="Bot" onClick={() => run('addBot', { reino: r, level: 'normal' })} />
                 )}
               </Trono>
             );
@@ -438,15 +434,8 @@ function Lobby({
               key={r}
               reino={r}
               state={mine ? 'mio' : 'ocupado'}
-              caption={holder.bot ? 'Máquina' : holder.name}
-              sub={holder.bot ? BOT_LABEL[holder.bot] : !holder.online ? 'desconectado' : undefined}
-              onClick={
-                host && holder.bot
-                  ? async () => {
-                      if (await run('removeBot', { playerId: holder.id })) run('addBot', { reino: r, level: NEXT[holder.bot!] });
-                    }
-                  : undefined
-              }
+              caption={holder.bot ? 'Bot' : holder.name}
+              sub={!holder.bot && !holder.online ? 'desconectado' : undefined}
             >
               {host && holder.bot && <CoinButton glyph="✕" label="Quitar" onClick={() => run('removeBot', { playerId: holder.id })} />}
             </Trono>
@@ -509,7 +498,7 @@ function OnlineGame({
           if (!host || !p || p.bot || p.online || g.phase === 'GAME_OVER') return null;
           return (
             <button className="small" onClick={() => call('takeover', { playerId: p.id })}>
-              Ceder a la máquina
+              Ceder al bot
             </button>
           );
         }}

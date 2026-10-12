@@ -578,6 +578,9 @@ button.start:hover:not(:disabled) {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.trono:not(.libre) .trono-caption {
+  color: var(--tc);
+}
 .trono.libre .trono-caption {
   color: var(--muted);
 }
@@ -683,8 +686,13 @@ button.start:hover:not(:disabled) {
   align-items: baseline;
   flex-wrap: wrap;
 }
-.topbar > .coin-btn {
+.top-coins {
   margin-left: auto;
+  display: flex;
+  gap: 10px;
+}
+.top-coins .coin-label {
+  display: none;
 }
 .chips,
 .tabbar,
@@ -991,8 +999,11 @@ button.tropa:disabled {
   align-items: center;
   gap: 8px;
   position: relative;
-  padding: 10px 14px;
-  background: #0d0907c0;
+  padding: 4px 0;
+  background: none;
+}
+.bid-panel .panel-title {
+  text-shadow: 0 1px 4px #000, 0 0 10px #000;
 }
 .bid-panel .gem {
   width: 48px;

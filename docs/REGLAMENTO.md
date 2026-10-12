@@ -65,8 +65,7 @@ Las victorias que no se puedan o no se quieran usar se pierden. Quien **falla** 
 ## Modos de la versión digital
 
 - **Online**: cada jugador en su dispositivo; se comparte el enlace de la partida. Los reinos libres se
-  pueden ocupar con jugadores máquina.
-- **En este dispositivo**: contra la máquina, por turnos entre varias personas en el mismo dispositivo
+  pueden ocupar con bots.
+- **En este dispositivo**: contra bots, por turnos entre varias personas en el mismo dispositivo
   (la pantalla se oculta al pasar el turno para que nadie vea las cartas ajenas), o mezclando ambos.
-- **Máquina**: *fácil* comete errores; *medio* calcula sus apuestas imaginando repartos posibles;
-  *difícil* imagina repartos posibles también para cada carta que juega. Nunca ve las cartas de los demás.
+- **Bots**: imaginan repartos posibles de las cartas que no ven; nunca miran las cartas de los demás.

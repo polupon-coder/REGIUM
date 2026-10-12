@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   batallas,
-  BOT_LABEL,
   GUERRAS,
   imperial,
   legalBids,
@@ -20,6 +19,16 @@ import {
 import { escudoImg, Lugares, lugarImg, pergaminoImg, preloadCards, regenteImg, Tropa } from './cards';
 import { Chart } from './Chart';
 import { Rules } from './Rules';
+
+/** Color de texto de cada reino (más claro que el del marco, para leerse sobre fondo oscuro). */
+export const TEXTO_REINO: Record<Reino, string> = {
+  rojo: '#e2665c',
+  verde: '#9cc865',
+  amarillo: '#e3c64e',
+  azul: '#5fb6d6',
+  morado: '#bb86d8',
+};
+const Rn = ({ r, children }: { r: Reino; children: ReactNode }) => <span style={{ color: TEXTO_REINO[r] }}>{children}</span>;
 
 export interface SeatMeta {
   name: string;
@@ -74,6 +83,8 @@ export function Table({
   const me = mySeat !== null ? g.players[mySeat] : null;
   const myTurn = mySeat !== null && g.turn === mySeat && g.phase !== 'GAME_OVER';
   const name = (s: number) => (s === mySeat ? 'Tú' : g.players[s].name);
+  /** Nombre del jugador en el color de su reino. */
+  const who = (s: number) => <Rn r={g.players[s].reino}>{name(s)}</Rn>;
 
   useEffect(() => preloadCards(g.players.map((p) => p.reino)), [g.players.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -100,8 +111,12 @@ export function Table({
         add(big, {
           big: true,
           tone: w === mySeat ? 'good' : undefined,
-          title: w === mySeat ? 'Ganas la batalla' : `Gana ${name(w)}`,
-          text: `con el ${card.valor} ${REINO_INFO[card.reino].nombre.replace('Reino ', '').toLowerCase()}`,
+          title: w === mySeat ? <Rn r={g.players[w].reino}>Ganas la batalla</Rn> : <>Gana {who(w)}</>,
+          text: (
+            <>
+              con el <Rn r={card.reino}>{card.valor} {REINO_INFO[card.reino].nombre.replace('Reino ', '').toLowerCase()}</Rn>
+            </>
+          ),
           plays: g.lastTrick.plays,
           winner: w,
         });
@@ -114,7 +129,7 @@ export function Table({
               big: false,
               img: regenteImg(pl.reino),
               imgKind: 'regente',
-              title: name(i),
+              title: who(i),
               text: (
                 <>
                   apuesta <b className="num">{pl.bid}</b> {pl.bid === 1 ? 'batalla' : 'batallas'}
@@ -129,7 +144,7 @@ export function Table({
         const built = Math.max(0, b.ciudades - a.ciudades);
         const razed = Math.max(0, a.ciudades - b.ciudades);
         const netT = b.territorios - a.territorios + built - razed;
-        const who = p.turn !== mySeat ? name(p.turn) : 'Un rival';
+        const quien = p.turn !== mySeat ? who(p.turn) : 'Un rival';
         if (netT > 0)
           add(big, {
             big: true,
@@ -155,7 +170,7 @@ export function Table({
             img: lugarImg(b.reino, 'ciudad', a.ciudades),
             imgKind: 'lugar',
             title: 'Ciudad arrasada',
-            text: `${who} arrasa una de tus ciudades: vuelve a ser territorio.`,
+            text: <>{quien} arrasa una de tus ciudades: vuelve a ser territorio.</>,
           });
         if (netT < 0)
           add(big, {
@@ -164,7 +179,7 @@ export function Table({
             img: lugarImg(b.reino, 'territorio', Math.max(1, a.ciudades + a.territorios)),
             imgKind: 'lugar',
             title: 'Territorio conquistado',
-            text: `${who} te arrebata un territorio.`,
+            text: <>{quien} te arrebata un territorio.</>,
           });
       }
       // Fin de una guerra: resumen y anuncio de la siguiente
@@ -217,7 +232,10 @@ export function Table({
             {g.phase === 'PLAY' ? `Batalla ${Math.min(g.battle + 1, batallas(g))}/${batallas(g)}` : `${batallas(g)} ${batallas(g) === 1 ? 'batalla' : 'batallas'}`}
           </span>
         </div>
-        <CoinButton glyph="☰" label="Menú" onClick={() => setPanel(panel === 'menu' ? 'none' : 'menu')} />
+        <div className="top-coins">
+          <CoinButton glyph="§" label="Reglas" onClick={() => setPanel(panel === 'rules' ? 'none' : 'rules')} />
+          <CoinButton glyph="☰" label="Menú" onClick={() => setPanel(panel === 'menu' ? 'none' : 'menu')} />
+        </div>
       </header>
 
       <section className="chips" style={{ ['--rivals' as string]: others.length }}>
@@ -254,7 +272,7 @@ export function Table({
         <section className={`mine ${myTurn ? 'active' : ''}`} style={{ ['--rc' as string]: REINO_INFO[me.reino].color }}>
           <div className="mine-head">
             <span className="pname">
-              {me.name} {g.emperor === mySeat && <span className="crown">♛</span>}
+              <Rn r={me.reino}>{me.name}</Rn> {g.emperor === mySeat && <span className="crown">♛</span>}
             </span>
             <BidLine g={g} seat={mySeat} />
             <span className="cities">
@@ -326,7 +344,7 @@ export function Table({
                 {currentBig.plays.map((pl) => (
                   <div key={pl.seat} className={`played ${pl.seat === currentBig.winner ? 'winner' : 'loser'}`}>
                     <Tropa card={pl.card} />
-                    <span className="who">{name(pl.seat)}</span>
+                    <span className="who">{who(pl.seat)}</span>
                   </div>
                 ))}
               </div>
@@ -366,9 +384,7 @@ function warNotice(g: GameState, name: (s: number) => string): Omit<Notice, 'id'
     title: `Guerra ${g.war + 1}`,
     text: (
       <>
-        {nb} {nb === 1 ? 'batalla' : 'batallas'} · <b>{REINO_INFO[r].nombre}</b>
-        <br />
-        Emperador: {name(g.emperor)}
+        {nb} {nb === 1 ? 'batalla' : 'batallas'} · <Rn r={r}>{REINO_INFO[r].nombre}</Rn>
       </>
     ),
   };
@@ -413,12 +429,12 @@ function SeatPanel({
         <img className="seat-face" src={g.emperor === seat ? escudoImg(p.reino) : regenteImg(p.reino)} alt="" />
         <div className="seat-info">
           <div className="pname">
-            {name(seat)} {g.emperor === seat && <span className="crown">♛</span>}
+            <Rn r={p.reino}>{name(seat)}</Rn> {g.emperor === seat && <span className="crown">♛</span>}
           </div>
           <BidLine g={g} seat={seat} />
           <div className="meta">
             {p.handCount} {p.handCount === 1 ? 'tropa' : 'tropas'}
-            {meta.bot ? ` · máquina ${BOT_LABEL[meta.bot]}` : meta.online === false ? ' · desconectado' : ''}
+            {meta.bot ? ' · bot' : meta.online === false ? ' · desconectado' : ''}
           </div>
         </div>
         <span className="cities">
@@ -449,7 +465,9 @@ function Battle({ g, name }: { g: GameState; name: (s: number) => string }) {
       {showing.plays.map((p) => (
         <div key={p.seat} className={`played ${showing.winner === p.seat ? 'winner' : ''}`}>
           <Tropa card={p.card} className={p.card.reino === imperial(g) ? 'imperial-card' : ''} />
-          <span className="who">{name(p.seat)}</span>
+          <span className="who">
+            <Rn r={g.players[p.seat].reino}>{name(p.seat)}</Rn>
+          </span>
         </div>
       ))}
     </div>
@@ -457,16 +475,21 @@ function Battle({ g, name }: { g: GameState; name: (s: number) => string }) {
 }
 
 function Status({ g, mySeat, name }: { g: GameState; mySeat: number | null; name: (s: number) => string }) {
-  let text = '';
   const mine = g.turn === mySeat;
-  if (g.phase === 'BID') text = mine ? '' : `${name(g.turn)} decide su apuesta…`;
+  const n = (s: number) => <Rn r={g.players[s].reino}>{name(s)}</Rn>;
+  let text: ReactNode = null;
+  if (g.phase === 'BID') text = mine ? null : <>{n(g.turn)} decide su apuesta…</>;
   else if (g.phase === 'PLAY') {
     if (g.trick.length === 0 && g.lastTrick && g.battle > 0) {
       const w = g.lastTrick.winner;
-      text = `${w === mySeat ? 'Ganas' : `${name(w)} gana`} la batalla. ${mine ? 'Sales tú.' : `Sale ${name(g.turn)}.`}`;
-    } else if (g.trick.length === 0) text = mine ? 'Sales tú: juega una tropa.' : `Sale ${name(g.turn)}.`;
-    else text = mine ? 'Tu turno: juega una tropa.' : `Turno de ${name(g.turn)}.`;
-  } else if (g.phase === 'RESOLVE') text = mine ? '' : `${name(g.turn)} reparte sus victorias…`;
+      text = (
+        <>
+          {w === mySeat ? 'Ganas' : <>{n(w)} gana</>} la batalla. {mine ? 'Sales tú.' : <>Sale {n(g.turn)}.</>}
+        </>
+      );
+    } else if (g.trick.length === 0) text = mine ? 'Sales tú: juega una tropa.' : <>Sale {n(g.turn)}.</>;
+    else text = mine ? 'Tu turno: juega una tropa.' : <>Turno de {n(g.turn)}.</>;
+  } else if (g.phase === 'RESOLVE') text = mine ? null : <>{n(g.turn)} reparte sus victorias…</>;
   if (!text) return null;
   return <div className={`status ${mine && g.phase !== 'GAME_OVER' ? 'mine' : ''}`}>{text}</div>;
 }
@@ -476,7 +499,7 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
   const n = batallas(g);
   return (
     <div className="bid-panel">
-      <div className="panel-title">Tu apuesta</div>
+      <div className="panel-title">Tu estrategia</div>
       <div className="bids">
         {Array.from({ length: n + 1 }, (_, b) => (
           <button key={b} className="gem" disabled={busy || !allowed.includes(b)} onClick={() => act({ type: 'bid', n: b })}>
@@ -546,7 +569,7 @@ function WarSummary({ g, index, name, onClose }: { g: GameState; index: number; 
               <div key={i} className={`sum-row ${ok ? 'hit' : 'miss'}`} style={{ ['--rc' as string]: REINO_INFO[p.reino].color }}>
                 <img className="sum-face" src={regenteImg(p.reino)} alt="" />
                 <div className="sum-name">
-                  {name(i)}
+                  <Rn r={p.reino}>{name(i)}</Rn>
                   {w.emperor === i && ' ♛'}
                 </div>
                 <div className="sum-score" title="Ganadas / apuesta">
@@ -598,7 +621,9 @@ function GameOver({ g, name, onExit }: { g: GameState; name: (s: number) => stri
         <div className="ranking">
           {ranking.map(({ p, i }) => (
             <div key={i} className="rank-row">
-              <span className="rank-name">{name(i)}</span>
+              <span className="rank-name">
+                <Rn r={p.reino}>{name(i)}</Rn>
+              </span>
               <Lugares player={p} size="md" />
             </div>
           ))}
