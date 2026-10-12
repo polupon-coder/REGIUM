@@ -717,22 +717,22 @@ button.start:hover:not(:disabled) {
 .imp-gem::after {
   content: '';
   position: absolute;
-  inset: 21%;
+  inset: 20%;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #ffffffaa 0%, var(--gc) 35%, #000 120%);
-  mix-blend-mode: color;
+  background: var(--gc);
+  mix-blend-mode: hard-light;
+  opacity: 0.85;
 }
 .imp-gem::before {
   content: '';
   position: absolute;
-  inset: 21%;
+  inset: 20%;
+  z-index: 1;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #ffffff55 0%, transparent 40%), var(--gc);
-  opacity: 0.45;
-  mix-blend-mode: overlay;
+  background: radial-gradient(circle at 36% 30%, #ffffffcc 0%, #ffffff33 18%, transparent 40%), radial-gradient(circle at 50% 60%, transparent 45%, #0007 100%);
 }
 .mine-face {
-  height: 42px;
+  width: 84px;
   aspect-ratio: 88 / 63;
   object-fit: cover;
   border-radius: 3px;
