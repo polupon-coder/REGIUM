@@ -325,7 +325,7 @@ export function Table({
         ))}
       </section>
 
-      <section className="field" style={{ backgroundImage: `url(${fondoImg(g.players[g.emperor].reino)}), url(/ui/papiro-heroes.webp)` }}>
+      <section className="field" style={{ backgroundImage: `url(${fondoImg(g.players[g.emperor].reino)})` }}>
         <div className="field-shade" />
         {bidding ? <BidPanel g={g} act={act} busy={busy} /> : resolve ? <ResolvePanel g={g} act={act} busy={busy} onAttack={() => setTab('reinos')} /> : <Battle g={g} name={name} />}
         <Status g={g} mySeat={mySeat} name={name} />
@@ -527,7 +527,7 @@ function Battle({ g, name }: { g: GameState; name: (s: number) => string }) {
   return (
     <div className={`battle ${showing.past ? 'past' : ''}`}>
       {showing.plays.map((p) => (
-        <div key={p.seat} className={`played ${showing.winner === p.seat ? 'winner' : ''}`}>
+        <div key={p.seat} className={`played ${showing.winner === p.seat ? 'winner' : ''}`} style={{ ['--rc' as string]: REINO_INFO[g.players[p.seat].reino].color }}>
           <Tropa card={p.card} className={p.card.reino === imperial(g) ? 'imperial-card' : ''} />
           <span className="who">
             <Rn r={g.players[p.seat].reino}>{name(p.seat)}</Rn>

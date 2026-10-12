@@ -75,6 +75,37 @@ def mascara_papiro(src, size):
         _MASCARA[size] = Image.fromarray((~fuera * 255).astype("uint8")).filter(ImageFilter.MinFilter(3))
     return _MASCARA[size]
 
+PAPIRO = os.path.join(os.path.dirname(__file__), "..", "arte", "ui", "pergamino-heroes.webp")
+FONDO_W, FONDO_H = 1400, 1000
+
+def fundir_en_papiro(card, fuerza=0.42):
+    """Funde el dibujo (solo su tinta, aclarada) en el papiro de Heroes, con los bordes difuminados."""
+    import numpy as np
+    from PIL import ImageFilter
+    papel = Image.open(PAPIRO).convert("RGB").resize((FONDO_W, FONDO_H), Image.LANCZOS)
+    caja = card.getchannel("A").getbbox()
+    ilu = card.crop(caja)
+    margen = 0.07
+    w = round(FONDO_W * (1 - 2 * margen)); h = round(w * ilu.height / ilu.width)
+    if h > FONDO_H * (1 - 2 * margen):
+        h = round(FONDO_H * (1 - 2 * margen)); w = round(h * ilu.width / ilu.height)
+    ilu = ilu.resize((w, h), Image.LANCZOS)
+    capa = Image.new("RGBA", (FONDO_W, FONDO_H), (0, 0, 0, 0))
+    capa.paste(ilu, ((FONDO_W - w) // 2, (FONDO_H - h) // 2))
+    # bordes: se encoge la silueta del papel y se difumina mucho, para que el dibujo se disuelva
+    borde = capa.getchannel("A").filter(ImageFilter.MinFilter(41)).filter(ImageFilter.GaussianBlur(45))
+    a = np.asarray(capa.convert("RGB")).astype(np.float32) / 255
+    lum = a.mean(2, keepdims=True)
+    tinta = (1 - lum) ** 1.15  # cuánto oscurece el dibujo
+    color = a / np.maximum(lum, 0.05)  # el tono del dibujo, sin su oscuridad
+    color = 0.55 + 0.45 * np.clip(color, 0, 1.6) / 1.6 * 1.6  # tono muy suave
+    k = tinta * fuerza * (np.asarray(borde).astype(np.float32)[..., None] / 255)
+    base = np.asarray(papel).astype(np.float32) / 255
+    sepia = np.array([0.30, 0.20, 0.12], np.float32)
+    tono = np.clip(sepia * color, 0, 1)
+    out = base * (1 - k) + base * tono * k
+    return Image.fromarray(np.clip(out * 255 + 0.5, 0, 255).astype("uint8"))
+
 def marco_escudo(dst):
     """Pone a cada escudo un marco del color de su reino, como el que llevan pintado los regentes."""
     import numpy as np
@@ -138,11 +169,9 @@ def main(src, dst):
         nuevo = Image.composite(relleno, rgb, suave).convert("RGBA")
         nuevo.putalpha(card.getchannel("A"))
         card = nuevo
-        # Se aísla el papiro: los cinco pergaminos comparten el mismo papel rasgado, así que el negro
-        # que los rodea es lo que está oscuro en los cinco a la vez (la tinta de cada dibujo no coincide)
-        card.putalpha(mascara_papiro(src, card.size).filter(ImageFilter.GaussianBlur(1.2)))
-        card = card.crop(card.getchannel("A").getbbox())
-        card.save(os.path.join(dst, f"fondo-{r}.webp"), quality=82)
+        # La ilustración, muy aflojada, se funde en el papiro de Heroes: sin bordes rasgados ni negro
+        card.putalpha(mascara_papiro(src, card.size))
+        fundir_en_papiro(card).save(os.path.join(dst, f"fondo-{r}.webp"), quality=84)
     print(len(os.listdir(dst)), "imágenes")
 
 if __name__ == "__main__":
