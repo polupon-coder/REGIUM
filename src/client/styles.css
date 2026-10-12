@@ -1986,3 +1986,16 @@ button.seal:hover:not(:disabled) {
     font-size: clamp(1rem, 1.3vw, 1.35rem);
   }
 }
+
+/* Portada en ordenador: mesa bastante más oscura y lacres más pequeños */
+@media (min-width: 701px) {
+  .home {
+    background: radial-gradient(ellipse at 50% 45%, #000000a0 0%, #000000e0 85%);
+  }
+  .home-content .menu button.seal {
+    width: min(118px, 8.6vw);
+    height: min(112px, 8.2vw);
+    padding: 10px 16px;
+    font-size: clamp(0.8rem, 1vw, 1rem);
+  }
+}

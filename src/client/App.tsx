@@ -53,9 +53,9 @@ export function App() {
             online
           </button>
           <button className="seal green solo-pc" onClick={() => setScreen('local-setup')}>
-            En este
+            Jugar
             <br />
-            dispositivo
+            aquí
           </button>
           {loadLocal() && (
             <button className="link" onClick={() => setScreen('local')}>
