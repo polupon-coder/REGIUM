@@ -743,6 +743,10 @@ button.start:hover:not(:disabled) {
   align-items: baseline;
   flex-wrap: wrap;
 }
+.imp-gem,
+.top-coins .coin {
+  filter: brightness(0.72) contrast(1.25) saturate(1.35);
+}
 .top-coins {
   margin-left: auto;
   display: flex;
@@ -1493,15 +1497,33 @@ button.tropa:disabled {
     background: #0f0b08b0;
     box-shadow: none;
   }
-  /* Tu regente: encima de los rivales, con el mismo recuadro */
+  /* Tu regente encima de los rivales; a los lados, tu nombre y tus marcadores */
   .me-chip-row {
+    display: grid;
+    grid-template-columns: 1fr calc((100% - 12px) / 3) 1fr;
+    align-items: center;
+    gap: 6px;
+  }
+  .me-side {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 1.15rem;
+    color: var(--parch);
   }
-  .mine-chip {
-    width: calc((100% - 12px) / 3);
+  .me-side.left {
+    align-items: flex-end;
+    text-align: right;
+    font-weight: 600;
   }
-  .tab-batalla .mine-head .mine-face {
+  .me-side.right {
+    align-items: flex-start;
+  }
+  .me-side b {
+    color: var(--gold);
+    font-size: 1.3rem;
+  }
+  .tab-batalla .mine-head {
     display: none;
   }
   .tab-reinos .me-chip-row {

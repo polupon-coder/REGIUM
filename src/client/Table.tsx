@@ -279,13 +279,18 @@ export function Table({
       </header>
 
       {me && mySeat !== null && (
-        <section className="chips me-chip-row">
+        <section className="me-chip-row">
+          <div className="me-side left">
+            <Rn r={me.reino}>{me.name}</Rn>
+            {g.emperor === mySeat && <span className="crown"> ♛</span>}
+          </div>
           <div className={`chip mine-chip ${myTurn ? 'turn' : ''}`}>
             <img src={regenteImg(me.reino)} alt="" />
-            <span className="chip-bid">{me.bid === null ? '–' : `${me.won}/${me.bid}`}</span>
-            <span className="chip-cities">
-              ♜{me.ciudades}
-              {g.emperor === mySeat && <span className="crown"> ♛</span>}
+          </div>
+          <div className="me-side right">
+            <span>⚔ {me.bid === null ? '–' : `${me.won}/${me.bid}`}</span>
+            <span>
+              ♜ <b>{me.ciudades}</b>/7
             </span>
           </div>
         </section>
