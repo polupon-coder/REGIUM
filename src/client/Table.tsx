@@ -137,6 +137,7 @@ export function Table({
             img: lugarImg(b.reino, 'territorio', Math.min(7, b.ciudades + b.territorios)),
             imgKind: 'lugar',
             title: 'Nuevo territorio',
+            text: 'Has acertado tu apuesta: tu reino gana un territorio.',
           });
         for (let k = 0; k < built; k++)
           add(big, {
@@ -145,7 +146,7 @@ export function Table({
             img: lugarImg(b.reino, 'ciudad', b.ciudades - built + k + 1),
             imgKind: 'lugar',
             title: 'Nueva ciudad',
-            text: `${b.ciudades - built + k + 1} de 7`,
+            text: `Conviertes un territorio en ciudad. Llevas ${b.ciudades - built + k + 1} de 7.`,
           });
         if (razed > 0)
           add(big, {
@@ -154,7 +155,7 @@ export function Table({
             img: lugarImg(b.reino, 'ciudad', a.ciudades),
             imgKind: 'lugar',
             title: 'Ciudad arrasada',
-            text: who,
+            text: `${who} arrasa una de tus ciudades: vuelve a ser territorio.`,
           });
         if (netT < 0)
           add(big, {
@@ -163,7 +164,7 @@ export function Table({
             img: lugarImg(b.reino, 'territorio', Math.max(1, a.ciudades + a.territorios)),
             imgKind: 'lugar',
             title: 'Territorio conquistado',
-            text: who,
+            text: `${who} te arrebata un territorio.`,
           });
       }
       // Fin de una guerra: resumen y anuncio de la siguiente
@@ -318,7 +319,7 @@ export function Table({
       )}
       {currentBig && g.phase !== 'GAME_OVER' && currentBig.summary === undefined && (
         <div className="overlay soft" onClick={closeBig}>
-          <div className={`notice framed ${currentBig.tone ?? ''} ${currentBig.imgKind ?? ''}`} role="status">
+          <div className={`notice framed ${currentBig.tone ?? ''} ${currentBig.imgKind ? `k-${currentBig.imgKind}` : ''}`} role="status">
             {currentBig.img && <img src={currentBig.img} alt="" />}
             {currentBig.plays && (
               <div className="notice-plays">

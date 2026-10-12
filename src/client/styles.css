@@ -1096,8 +1096,8 @@ button.tropa:disabled {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 10px 18px;
-  max-width: 520px;
+  padding: 10px 14px;
+  max-width: min(520px, calc(100vw - 16px));
   text-align: center;
   animation: pop 0.3s ease-out;
 }
@@ -1113,7 +1113,7 @@ button.tropa:disabled {
   justify-content: center;
   align-items: flex-end;
   padding-top: 14px;
-  --card-w: min(110px, calc((90vw - 60px - (var(--np) - 1) * 8px) / var(--np)));
+  --card-w: min(110px, calc((100vw - 100px - (var(--np) - 1) * 8px) / var(--np)));
 }
 .notice .notice-plays img {
   width: 100%;
@@ -1127,12 +1127,12 @@ button.tropa:disabled {
   transform: translateY(-14px) scale(1.08);
 }
 .notice img {
-  width: min(420px, 80vw);
+  width: min(420px, calc(100vw - 100px));
   border-radius: 4px;
   box-shadow: 0 8px 24px #000;
 }
-.notice.pergamino img {
-  width: min(460px, 80vw);
+.notice.k-pergamino img {
+  width: min(460px, calc(100vw - 100px));
 }
 .notice h2 {
   color: var(--gold);
