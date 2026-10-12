@@ -19,6 +19,20 @@ def recorte(path):
     card = im.crop((l, t, l + round(cw * sx), t + round(ch * sy))).convert("RGBA")
     return card, sx
 
+def niveles(card):
+    """Quita el velo gris: lleva el negro de la carta a negro de verdad (punto negro en el
+    percentil 0,5) y estira los blancos si la carta no llega a ellos, con una curva suave."""
+    import numpy as np
+    a = np.asarray(card).astype(np.float32)
+    rgb, alpha = a[..., :3], a[..., 3:]
+    L = rgb.mean(2)[a[..., 3] > 200]
+    bp = max(0.0, float(np.percentile(L, 0.5)) - 4)
+    wp = max(float(np.percentile(L, 99.7)), 200.0)
+    x = np.clip((rgb - bp) / (wp - bp), 0, 1)
+    x = x ** 1.08  # un poco más de profundidad en las sombras
+    out = np.concatenate([x * 255, alpha], axis=2)
+    return Image.fromarray(np.clip(out + 0.5, 0, 255).astype("uint8"), "RGBA")
+
 def esquinas(card, radius):
     m = Image.new("L", card.size, 0)
     ImageDraw.Draw(m).rounded_rectangle((0, 0, card.size[0] - 1, card.size[1] - 1), radius=radius, fill=255)
@@ -35,6 +49,7 @@ def main(src, dst):
         long_side = 1400 if name == "dorso-regium" else 900 if big else 520
         scale = long_side / max(card.size)
         card = card.resize((round(card.width * scale), round(card.height * scale)), Image.LANCZOS)
+        card = niveles(card)
         card = esquinas(card, round(RADIUS_MM * s * scale))
         card.save(os.path.join(dst, name + ".webp"), quality=82, method=6)
     print(len(os.listdir(dst)), "imágenes")
