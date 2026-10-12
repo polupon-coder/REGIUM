@@ -1,27 +1,18 @@
-"""Recorta el pergamino de la portada (sin el fondo marrón). Uso: python3 -I tools/pergamino_portada.py"""
-from PIL import Image, ImageFilter, ImageDraw
+"""Pergamino de la portada sin recortar: solo se difumina el fondo marrón hacia los bordes
+para que se funda con la mesa. Uso: python3 -I tools/pergamino_portada.py"""
+from PIL import Image
 import numpy as np
 im = Image.open('arte/ui/pergamino-portada.webp').convert('RGB')
-k = 0.7
-im = im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS)
+im.thumbnail((1000, 1400))
+w, h = im.size
+y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+# distancia normalizada al borde más cercano (0 en el borde, 1 a un 16 % hacia dentro)
+d = np.minimum(np.minimum(x, w - 1 - x) / (w * 0.16), np.minimum(y, h - 1 - y) / (h * 0.11))
+alpha = np.clip(d, 0, 1) ** 1.6
+# el fondo marrón (oscuro y con tono rojizo) se apaga un poco; el papel claro queda igual
 a = np.asarray(im).astype(np.float32)
-lum = a.mean(2)
-# Hoja: lo claro, con los huecos interiores (letras) rellenos
-m = Image.fromarray(((lum > 105) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))
-s = lambda *v: [round(x * k) for x in v]
-# Rollo superior: su contorno, trazado a mano (su sombra se confunde con el fondo marrón)
-ROLLO = [(150, 200), (175, 182), (330, 192), (700, 215), (930, 232), (1180, 252), (1232, 300), (1240, 380),
-         (1232, 440), (1185, 432), (1150, 410), (930, 402), (600, 405), (230, 412), (175, 405), (150, 380), (145, 290)]
-ImageDraw.Draw(m).polygon([(round(x * k), round(y * k)) for x, y in ROLLO], fill=255)
-fill = m.copy()
-ImageDraw.floodfill(fill, (0, 0), 128)
-keep = np.asarray(fill) != 128
-alpha = Image.fromarray((keep * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.3))
-out = im.convert('RGBA')
-out.putalpha(alpha)
-# Se quita la franja vacía entre el rollo y la hoja para que la hoja cuelgue del rollo
-a_ = np.asarray(out)
-g0, g1 = round(418 * k), round(462 * k)
-out = Image.fromarray(np.concatenate([a_[:g0], a_[g1:]]))
-out = out.crop(out.getchannel('A').getbbox())
-out.save('public/ui/pergamino-portada.webp', quality=85)
+lum = a.mean(axis=2, keepdims=True)
+k = np.clip((lum - 60) / 70, 0, 1)
+a = a * (0.55 + 0.45 * k)
+out = np.concatenate([a, (alpha * 255)[..., None]], axis=2)
+Image.fromarray(np.clip(out, 0, 255).astype('uint8'), 'RGBA').save('public/ui/pergamino-portada.webp', quality=85)
