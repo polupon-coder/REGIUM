@@ -266,7 +266,7 @@ export function addBot(room: Room, token: string, reino: Reino, level: BotLevel)
     name: REINO_INFO[reino].nombre,
     reino,
     ready: true,
-    bot: level,
+    bot: 'dificil',
   });
   save(room);
 }
@@ -288,7 +288,7 @@ export function takeover(room: Room, token: string, playerId: number, online: Se
   if (!p) throw new RoomError('Jugador desconocido.');
   if (p.bot) throw new RoomError('Ese sitio ya lo juega la máquina.');
   if (online.has(p.id)) throw new RoomError('Ese jugador está conectado.');
-  p.bot = 'normal';
+  p.bot = 'dificil';
   p.takeover = true;
   save(room);
 }

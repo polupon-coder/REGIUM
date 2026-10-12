@@ -132,8 +132,8 @@ function saveLocal(s: LocalSave | null) {
 function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => void }) {
   const [seats, setSeats] = useState<Record<Reino, LocalSeat | null>>(() => ({
     rojo: { reino: 'rojo', kind: 'human', name: 'Jugador 1' },
-    verde: { reino: 'verde', kind: 'normal', name: '' },
-    amarillo: { reino: 'amarillo', kind: 'normal', name: '' },
+    verde: { reino: 'verde', kind: 'dificil', name: '' },
+    amarillo: { reino: 'amarillo', kind: 'dificil', name: '' },
     azul: null,
     morado: null,
   }));
@@ -149,7 +149,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
     saveLocal({ game, seats: chosen.map((s, i) => ({ name: players[i].name, bot: s.kind === 'human' ? null : s.kind })) });
     onStart();
   };
-  const CYCLE: (LocalSeat['kind'] | null)[] = [null, 'human', 'normal'];
+  const CYCLE: (LocalSeat['kind'] | null)[] = [null, 'human', 'dificil'];
   const cycle = (r: Reino) => {
     const cur = seats[r]?.kind ?? null;
     const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];

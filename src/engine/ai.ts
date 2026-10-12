@@ -182,10 +182,12 @@ function mcBid(g: GameState, seat: number, rand: Rand, samples = 48): number {
   return best;
 }
 
-function mcPlay(g: GameState, seat: number, rand: Rand, samples = 24): Card {
+function mcPlay(g: GameState, seat: number, rand: Rand, maxSamples = 24): Card {
   const me = g.players[seat];
   const legal = legalCards(me.hand, g.trick, imperial(g));
   if (legal.length === 1) return legal[0];
+  // Presupuesto de cálculo: con muchas opciones, menos repartos imaginados por opción (rápido en el móvil)
+  const samples = Math.max(12, Math.min(maxSamples, Math.round(120 / legal.length)));
   let best = legal[0];
   let bestV = -1;
   for (const card of legal) {
@@ -206,20 +208,21 @@ function mcPlay(g: GameState, seat: number, rand: Rand, samples = 24): Card {
 function chooseResolve(g: GameState, seat: number, level: BotLevel, rand: Rand): Action {
   const o = resolveOptions(g);
   const me = g.players[seat];
-  // Amenaza: rival con más ciudades (cerca de ganar)
+  // 1. Si levantar una ciudad le da la victoria, la levanta
+  if (o.build && me.ciudades >= 6) return { type: 'build' };
   const rivals = g.players.map((p, i) => ({ p, i })).filter((x) => x.i !== seat);
   rivals.sort((a, b) => b.p.ciudades - a.p.ciudades || b.p.territorios - a.p.territorios);
-  const leader = rivals[0];
-  const danger = leader && leader.p.ciudades >= (level === 'dificil' ? 5 : 6) && leader.p.ciudades > me.ciudades;
-  if (danger && o.destroyCity.includes(leader.i) && (level !== 'facil' || rand() < 0.5))
-    return { type: 'destroyCity', target: leader.i };
+  // 2. Frena a quien está cerca de ganar: arrasa sus ciudades
+  const umbral = level === 'facil' ? 6 : 5;
+  const amenaza = rivals.find((r) => r.p.ciudades >= umbral && r.p.ciudades >= me.ciudades && o.destroyCity.includes(r.i));
+  if (amenaza && (level !== 'facil' || rand() < 0.5)) return { type: 'destroyCity', target: amenaza.i };
+  // 3. Si no, levanta ciudades propias (cada una le suma frente a todos los rivales)
   if (o.build) return { type: 'build' };
-  if (o.destroyCity.length) {
-    const t = rivals.find((r) => o.destroyCity.includes(r.i))!;
-    return { type: 'destroyCity', target: t.i };
-  }
+  // 4. Sin territorios propios: arrasa al que va primero; y si no hay ciudades, conquista territorio
+  if (o.destroyCity.length) return { type: 'destroyCity', target: rivals.find((r) => o.destroyCity.includes(r.i))!.i };
   if (o.destroyTerritory.length) {
-    const t = rivals.find((r) => o.destroyTerritory.includes(r.i))!;
+    // conquista al que más territorios tiene a punto de convertir
+    const t = [...rivals].sort((a, b) => b.p.territorios + b.p.ciudades - (a.p.territorios + a.p.ciudades)).find((r) => o.destroyTerritory.includes(r.i))!;
     return { type: 'destroyTerritory', target: t.i };
   }
   return { type: 'pass' };
