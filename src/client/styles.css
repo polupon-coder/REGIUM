@@ -2031,3 +2031,21 @@ button.seal:hover:not(:disabled) {
     font-size: 1.25rem;
   }
 }
+
+/* Ordenador: más aire sobre los regentes y colores algo más apagados en las cartas */
+@media (min-width: 701px) {
+  .setup .tronos {
+    margin-top: 4vh;
+  }
+  .trono-img img,
+  .tropa img,
+  .lugar img,
+  .seat-face,
+  .mine-face,
+  .sum-face,
+  .sum-cards img,
+  .notice img,
+  .gameover-crown img {
+    filter: saturate(0.82) brightness(0.9);
+  }
+}
