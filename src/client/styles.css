@@ -237,6 +237,10 @@ select {
   height: 40px;
   display: grid;
   place-items: center;
+  line-height: 1;
+  /* los símbolos quedan algo bajos: se suben al centro del botón */
+  padding-bottom: 7%;
+  font-family: 'DejaVu Sans', Arial, sans-serif;
   font-size: 1.15rem;
 }
 .coin-btn.big .coin {
