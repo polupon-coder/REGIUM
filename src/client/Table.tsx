@@ -264,7 +264,7 @@ export function Table({
   return (
     <div className={`table tab-${tab}`} style={{ ['--imp' as string]: REINO_INFO[imp].color, ['--np' as string]: n }}>
       <header className="topbar">
-        <span className="imp-gem" style={{ ['--gc' as string]: REINO_INFO[imp].color }} title={`La guerra tiene lugar en el ${REINO_INFO[imp].nombre}`} />
+        <span className={`imp-gem ${imp === 'amarillo' ? 'claro' : ''}`} style={{ ['--gc' as string]: imp === 'amarillo' ? '#ffd000' : REINO_INFO[imp].color }} title={`La guerra tiene lugar en el ${REINO_INFO[imp].nombre}`} />
         <div className="war-info">
           <span className="war-n">
             Guerra <b>{g.war + 1}</b>/{GUERRAS.length}

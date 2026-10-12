@@ -730,6 +730,10 @@ button.start:hover:not(:disabled) {
   border-radius: 50%;
   background: radial-gradient(circle at 36% 30%, #ffffff99 0%, #ffffff22 18%, transparent 40%);
 }
+.imp-gem.claro::after {
+  mix-blend-mode: hard-light;
+  opacity: 0.9;
+}
 .mine-face {
   width: 84px;
   aspect-ratio: 88 / 63;
@@ -743,9 +747,11 @@ button.start:hover:not(:disabled) {
   align-items: baseline;
   flex-wrap: wrap;
 }
-.imp-gem,
 .top-coins .coin {
   filter: brightness(0.72) contrast(1.25) saturate(1.35);
+}
+.imp-gem {
+  filter: contrast(1.15) saturate(1.5);
 }
 .top-coins {
   margin-left: auto;
@@ -1500,7 +1506,7 @@ button.tropa:disabled {
   /* Tu regente encima de los rivales; a los lados, tu nombre y tus marcadores */
   .me-chip-row {
     display: grid;
-    grid-template-columns: 1fr calc((100% - 12px) / 3) 1fr;
+    grid-template-columns: repeat(3, 1fr);
     align-items: center;
     gap: 6px;
   }
@@ -1511,13 +1517,13 @@ button.tropa:disabled {
     font-size: 1.15rem;
     color: var(--parch);
   }
-  .me-side.left {
-    align-items: flex-end;
-    text-align: right;
-    font-weight: 600;
+  /* centrados en el mismo eje que los regentes rivales de debajo */
+  .me-side {
+    align-items: center;
+    text-align: center;
   }
-  .me-side.right {
-    align-items: flex-start;
+  .me-side.left {
+    font-weight: 600;
   }
   .me-side b {
     color: var(--gold);
