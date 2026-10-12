@@ -2204,7 +2204,7 @@ button.seal:hover:not(:disabled) {
   font-size: clamp(0.8rem, 3vw, 1.08rem);
 }
 .field .played .who span[style] {
-  color: inherit !important;
+  color: var(--tinta) !important;
 }
 /* trazo más grueso para la tinta sobre el papiro */
 .field .status,

@@ -29,6 +29,14 @@ export const TEXTO_REINO: Record<Reino, string> = {
   azul: '#5fb6d6',
   morado: '#bb86d8',
 };
+/* Tinta oscura del color de cada reino para escribir sobre el papiro */
+const TINTA_REINO: Record<Reino, string> = {
+  rojo: '#5e0c04',
+  verde: '#1a3d06',
+  amarillo: '#4f3700',
+  azul: '#082c52',
+  morado: '#3b0c50',
+};
 const Rn = ({ r, children }: { r: Reino; children: ReactNode }) => <span style={{ color: TEXTO_REINO[r] }}>{children}</span>;
 
 export interface SeatMeta {
@@ -527,7 +535,7 @@ function Battle({ g, name }: { g: GameState; name: (s: number) => string }) {
   return (
     <div className={`battle ${showing.past ? 'past' : ''}`}>
       {showing.plays.map((p) => (
-        <div key={p.seat} className={`played ${showing.winner === p.seat ? 'winner' : ''}`}>
+        <div key={p.seat} className={`played ${showing.winner === p.seat ? 'winner' : ''}`} style={{ ['--tinta' as string]: TINTA_REINO[g.players[p.seat].reino] }}>
           <Tropa card={p.card} className={p.card.reino === imperial(g) ? 'imperial-card' : ''} />
           <span className="who">
             <Rn r={g.players[p.seat].reino}>{name(p.seat)}</Rn>
