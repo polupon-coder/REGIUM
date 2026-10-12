@@ -248,11 +248,11 @@ export function Table({
         <section className={`mine ${myTurn ? 'active' : ''}`} style={{ ['--rc' as string]: REINO_INFO[me.reino].color }}>
           <div className="mine-head">
             <span className="pname">
-              {me.name} {g.emperor === mySeat && <span className="crown">♛ Emperador</span>}
+              {me.name} {g.emperor === mySeat && <span className="crown">♛</span>}
             </span>
             <BidLine g={g} seat={mySeat} />
             <span className="cities">
-              Ciudades <b>{me.ciudades}</b>/7
+              ♜ <b>{me.ciudades}</b>/7
             </span>
           </div>
           <div className="my-lugares">
@@ -278,10 +278,10 @@ export function Table({
       )}
 
       <nav className="tabbar">
-        <button className={tab === 'batalla' ? 'on' : ''} onClick={() => setTab('batalla')}>
+        <button className={`start ${tab === 'batalla' ? 'on' : ''}`} onClick={() => setTab('batalla')}>
           ⚔ Batalla
         </button>
-        <button className={tab === 'reinos' ? 'on' : ''} onClick={() => setTab('reinos')}>
+        <button className={`start ${tab === 'reinos' ? 'on' : ''}`} onClick={() => setTab('reinos')}>
           ♜ Reinos{resolve && (resolve.destroyCity.length > 0 || resolve.destroyTerritory.length > 0) ? ' •' : ''}
         </button>
       </nav>
@@ -358,13 +358,14 @@ function warNotice(g: GameState, name: (s: number) => string): Omit<Notice, 'id'
   };
 }
 
+/** Batallas ganadas / apuesta, con un símbolo. */
 function BidLine({ g, seat }: { g: GameState; seat: number }) {
   const p = g.players[seat];
-  if (p.bid === null) return <span className="bidline muted">{g.phase === 'BID' && g.turn === seat ? 'Apostando…' : 'Sin apuesta'}</span>;
+  if (p.bid === null) return <span className="bidline muted">⚔ –</span>;
   const cls = g.phase === 'RESOLVE' ? (p.won === p.bid ? 'hit' : 'miss') : '';
   return (
-    <span className={`bidline ${cls}`}>
-      Apuesta <b>{p.bid}</b> · Ganadas <b>{p.won}</b>
+    <span className={`bidline ${cls}`} title="Batallas ganadas / apuesta">
+      ⚔ <b>{p.won}</b>/{p.bid}
     </span>
   );
 }
@@ -405,7 +406,7 @@ function SeatPanel({
           </div>
         </div>
         <span className="cities">
-          <b>{p.ciudades}</b>/7
+          ♜ <b>{p.ciudades}</b>/7
         </span>
       </div>
       <Lugares

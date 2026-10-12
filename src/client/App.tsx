@@ -144,7 +144,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
   const set = (r: Reino, v: LocalSeat | null) => setSeats({ ...seats, [r]: v });
   const start = () => {
     const players = chosen.map((s, i) => ({
-      name: s.kind === 'human' ? s.name.trim() || `Jugador ${i + 1}` : BOT_NAMES[s.reino],
+      name: s.kind === 'human' ? s.name.trim() || `Jugador ${i + 1}` : REINO_INFO[s.reino].nombre,
       reino: s.reino,
     }));
     const game = createGame(players, Math.floor(Math.random() * 2 ** 31));
@@ -188,13 +188,6 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
   );
 }
 
-const BOT_NAMES: Record<Reino, string> = {
-  rojo: 'Emperador del Dragón',
-  verde: 'Reina del Águila',
-  amarillo: 'Sultán de la Serpiente',
-  azul: 'Rey del Norte',
-  morado: 'Señor del Elefante',
-};
 
 const BOT_DELAY = 900;
 

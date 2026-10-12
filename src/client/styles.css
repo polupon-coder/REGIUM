@@ -1347,7 +1347,7 @@ button.tropa:disabled {
 /* ------------------------------------------------------------------ Mesa en el móvil: dos apartados */
 @media (max-width: 700px) {
   .table {
-    padding-bottom: 70px;
+    padding-bottom: 96px;
   }
   .mobile-only {
     display: inline-flex;
@@ -1401,26 +1401,22 @@ button.tropa:disabled {
   .tabbar {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 8px;
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 30;
-    background: #0d0907f2;
-    border-top: 1px solid var(--gold);
+    padding: 6px 8px 8px;
+    background: linear-gradient(#0d090700, #0d0907f0 30%);
   }
-  .tabbar button {
-    border: none;
-    background: none;
-    box-shadow: none;
-    padding: 14px 0;
-    font-family: 'IM Fell English', serif;
+  .tabbar button.start {
+    min-width: 0;
     font-size: 1.2rem;
-    color: var(--muted);
+    filter: brightness(0.6) drop-shadow(0 4px 10px #000c);
   }
-  .tabbar button.on {
-    color: var(--gold);
-    background: #2a1f14;
+  .tabbar button.start.on {
+    filter: brightness(1.15) drop-shadow(0 4px 10px #000c);
   }
   /* Apartado Batalla: campo y mano */
   .tab-batalla .rivals,
@@ -1428,6 +1424,7 @@ button.tropa:disabled {
     display: none;
   }
   /* Apartado Reinos: los lugares de todos, grandes */
+  .tab-reinos .mine .hand,
   .tab-reinos .chips,
   .tab-reinos .field,
   .tab-reinos .hand {
@@ -1438,19 +1435,25 @@ button.tropa:disabled {
     flex-direction: column;
     gap: 12px;
   }
-  .tab-reinos .seat .meta {
-    display: block;
-  }
   .tab-reinos .seat-face {
     display: initial;
+    height: 52px;
   }
-  .tab-reinos .seat-face {
-    height: 44px;
+  .tab-reinos .seat .pname,
+  .tab-reinos .mine-head .pname {
+    font-size: 1.25rem;
   }
+  .tab-reinos .bidline {
+    font-size: 1.1rem;
+  }
+  /* Lugares el doble de grandes: dos por fila y sin huecos vacíos */
   .tab-reinos .lugares,
   .tab-reinos .lugares.lg {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .tab-reinos .lugar.reserva {
+    display: none;
   }
   /* Cartas grandes: en la mano, filas de hasta 4; en la batalla, todas en una fila */
   .hand {

@@ -10,6 +10,7 @@ import {
   legalCards,
   imperial,
   pendingSeats,
+  REINO_INFO,
   REINOS,
   RuleError,
   viewFor,
@@ -243,13 +244,6 @@ export type PublicRoom = ReturnType<typeof publicRoom>;
 // ---------------------------------------------------------------------------------------------
 // Jugadores máquina
 // ---------------------------------------------------------------------------------------------
-const BOT_NAME: Record<Reino, string> = {
-  rojo: 'Emperador del Dragón',
-  verde: 'Reina del Águila',
-  amarillo: 'Sultán de la Serpiente',
-  azul: 'Rey del Norte',
-  morado: 'Señor del Elefante',
-};
 
 function requireHost(room: Room, token: string) {
   const p = playerByToken(room, token);
@@ -269,7 +263,7 @@ export function addBot(room: Room, token: string, reino: Reino, level: BotLevel)
   room.players.push({
     id: nextId(room),
     token: randomBytes(16).toString('hex'),
-    name: BOT_NAME[reino],
+    name: REINO_INFO[reino].nombre,
     reino,
     ready: true,
     bot: level,
