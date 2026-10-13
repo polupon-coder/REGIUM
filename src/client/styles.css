@@ -2677,3 +2677,15 @@ button.seal:hover:not(:disabled) {
     display: none !important;
   }
 }
+
+/* Preparación: los regentes, algo separados de la cabecera */
+.setup .tronos {
+  margin-top: 22px;
+}
+/* Ordenador, en juego: las columnas de reinos algo separadas de la barra superior */
+@media (min-width: 701px) {
+  .rivals .seat,
+  .mine-head {
+    padding-top: 14px !important;
+  }
+}
