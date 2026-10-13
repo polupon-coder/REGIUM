@@ -2767,3 +2767,27 @@ button.seal:hover:not(:disabled) {
       #0a0705 !important;
   }
 }
+
+/* Portada en el móvil: la misma ilustración a pantalla completa, título arriba y placas abajo */
+@media (max-width: 700px) {
+  .home {
+    background:
+      linear-gradient(180deg, #0a0705cc 0%, #0a070522 22%, #0a070500 45%, #0a0705aa 72%, #0a0705f2 100%),
+      url('/ui/portada-pc.webp') 50% 40% / cover no-repeat,
+      #0a0705 !important;
+    justify-content: space-between !important;
+    padding: 6vh 16px 6vh !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .home-bg,
+  .home .cover {
+    display: none !important;
+  }
+  .home .titulo-pc {
+    display: block !important;
+    width: 86vw;
+    height: auto;
+    filter: drop-shadow(0 4px 12px #000);
+  }
+}
