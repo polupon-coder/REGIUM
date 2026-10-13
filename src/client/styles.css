@@ -2382,3 +2382,119 @@ button.seal:hover:not(:disabled) {
   --card-w: min(130px, calc((var(--notice-w, 520px) - 90px - (var(--np) - 1) * 8px) / var(--np)));
   max-width: 100%;
 }
+
+/* ------------------------------------------------------------------ Ordenador: cada reino en una columna
+   (regente arriba y sus siete lugares en vertical), así caben los cinco sin cortes ni desplazamiento */
+@media (min-width: 701px) {
+  .table {
+    --kw: clamp(96px, calc((100vw - 780px) / var(--np)), 170px);
+    grid-template-columns: minmax(0, 1fr) var(--kw) calc(var(--kw) * (var(--np) - 1) + (var(--np) - 2) * 10px);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'top top top'
+      'field head rivals'
+      'field mylug rivals'
+      'hand mylug rivals';
+    column-gap: 10px;
+    row-gap: 0;
+  }
+  .field {
+    margin-right: 8px;
+    align-self: start;
+  }
+  .hand {
+    margin-right: 8px;
+  }
+  .rivals {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+  .rivals .seat {
+    flex: 0 0 var(--kw);
+    width: var(--kw);
+    height: 100%;
+    min-height: 0;
+    padding: 6px !important;
+    gap: 6px !important;
+    display: flex;
+    flex-direction: column;
+  }
+  .seat-head,
+  .mine-head {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: center;
+    gap: 2px !important;
+    flex-wrap: nowrap !important;
+  }
+  .mine-head {
+    padding: 6px 6px 4px !important;
+  }
+  .seat-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .seat-face,
+  .mine-head .mine-face {
+    width: 100% !important;
+    max-width: 120px;
+  }
+  .seat .pname,
+  .mine-head .pname {
+    font-size: clamp(0.72rem, 0.95vw, 1rem) !important;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+  .seat .meta {
+    display: none;
+  }
+  .my-lugares {
+    padding: 2px 6px 8px !important;
+    min-height: 0;
+    display: flex;
+  }
+  .rivals .seat .lugares,
+  .my-lugares .lugares {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(7, minmax(0, 1fr));
+    gap: 4px !important;
+    justify-items: center;
+  }
+  .rivals .lugar,
+  .my-lugares .lugar,
+  .rivals .lugar.reserva,
+  .my-lugares .lugar.reserva {
+    display: block !important;
+    flex: none !important;
+    width: auto !important;
+    height: 100% !important;
+    max-width: 100%;
+    aspect-ratio: 88 / 63;
+    min-height: 0;
+  }
+  .rivals .lugar img,
+  .my-lugares .lugar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+@media (min-width: 701px) {
+  .seat .pname,
+  .mine-head .pname {
+    font-size: clamp(0.62rem, calc(var(--kw) / 13), 1rem) !important;
+    max-width: 100%;
+    overflow: hidden;
+  }
+}
