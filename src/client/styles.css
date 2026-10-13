@@ -2741,3 +2741,20 @@ button.seal:hover:not(:disabled) {
     display: none !important;
   }
 }
+
+/* Portada en ordenador: las dos placas una al lado de la otra; el idioma debajo */
+@media (min-width: 701px) {
+  .home-content .menu {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 14px 24px !important;
+    width: min(760px, 92vw);
+  }
+  .home-content .menu > .link,
+  .home-content .menu > .langs {
+    flex-basis: 100%;
+  }
+}
