@@ -2725,3 +2725,19 @@ button.seal:hover:not(:disabled) {
 .home .langs button.on {
   border-bottom: 1px solid currentColor !important;
 }
+
+/* Portada en ordenador: la ilustración del salón del trono a pantalla completa, oscurecida
+   por arriba y por abajo para que se lean el título y las placas */
+@media (min-width: 701px) {
+  .home {
+    background:
+      linear-gradient(180deg, #0a0705d9 0%, #0a070555 30%, #0a070522 55%, #0a0705cc 80%, #0a0705f2 100%),
+      url('/ui/portada-pc.webp') center 30% / cover no-repeat,
+      #0a0705 !important;
+    justify-content: space-between !important;
+    padding: 6vh 16px 7vh !important;
+  }
+  .home-bg {
+    display: none !important;
+  }
+}
