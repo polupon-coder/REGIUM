@@ -2372,3 +2372,13 @@ button.seal:hover:not(:disabled) {
   font-size: clamp(1.05rem, 5vw, 2rem);
   max-width: 100%;
 }
+
+/* Aviso con las cartas de la batalla: las cartas se calculan sobre el ancho del marco, nunca se salen */
+.notice:has(.notice-plays) {
+  --notice-w: min(820px, calc(100vw - 16px));
+  max-width: var(--notice-w);
+}
+.notice-plays {
+  --card-w: min(130px, calc((var(--notice-w, 520px) - 90px - (var(--np) - 1) * 8px) / var(--np)));
+  max-width: 100%;
+}
