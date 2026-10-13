@@ -1,5 +1,6 @@
 // Gráfico final: ciudades de cada regente al final de cada guerra.
 import { REINO_INFO, type GameState } from '../engine';
+import { L } from './i18n';
 
 export function Chart({ g, name }: { g: GameState; name: (s: number) => string }) {
   const rows = g.scoreHistory; // rows[k][seat] = ciudades tras k guerras
@@ -11,7 +12,7 @@ export function Chart({ g, name }: { g: GameState; name: (s: number) => string }
   const y = (v: number) => H - pad.b - (v / 7) * (H - pad.t - pad.b);
   return (
     <figure className="chart">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Ciudades de cada regente al final de cada guerra">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={L('Ciudades de cada regente al final de cada guerra', 'Cities of each regent at the end of each war')}>
         {[0, 1, 2, 3, 4, 5, 6, 7].map((v) => (
           <g key={v}>
             <line x1={pad.l} x2={W - pad.r} y1={y(v)} y2={y(v)} className="grid" />
@@ -40,7 +41,7 @@ export function Chart({ g, name }: { g: GameState; name: (s: number) => string }
           </polyline>
         ))}
       </svg>
-      <figcaption>Ciudades al final de cada guerra</figcaption>
+      <figcaption>{L('Ciudades al final de cada guerra', 'Cities at the end of each war')}</figcaption>
     </figure>
   );
 }

@@ -1,5 +1,6 @@
 import { io } from 'socket.io-client';
 import type { PublicRoom } from '../server/rooms';
+import { trError } from './i18n';
 
 export type { PublicRoom };
 export const socket = io({ transports: ['websocket', 'polling'], autoConnect: false });
@@ -15,7 +16,7 @@ export interface Reply {
 export const call = (event: string, data?: unknown) =>
   new Promise<Reply>((resolve) => {
     if (!socket.connected) socket.connect();
-    socket.emit(event, data, (r: Reply) => resolve(r));
+    socket.emit(event, data, (r: Reply) => resolve(r.error ? { ...r, error: trError(r.error) } : r));
   });
 
 const KEY = 'regium:sessions';

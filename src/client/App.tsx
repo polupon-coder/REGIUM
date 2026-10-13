@@ -15,8 +15,12 @@ import {
 } from '../engine';
 import { PORTADA, pergaminoImg, preloadCards, RegenteCard, regenteImg, escudoImg } from './cards';
 import { Rules } from './Rules';
+import { EN, L, playerName, reinoName, setLang, trError } from './i18n';
 import { call, forgetSession, lastCode, loadSessions, saveSession, socket, tabSessions, type PublicRoom } from './socket';
 import { CoinButton, Table, TEXTO_REINO, type SeatMeta } from './Table';
+
+/** «Bot fácil» / «Easy bot». */
+const botLabel = (b: BotLevel) => L(`Bot ${BOT_LABEL[b]}`, `${b === 'facil' ? 'Easy' : b === 'dificil' ? 'Hard' : 'Medium'} bot`);
 
 type Screen = 'home' | 'local-setup' | 'local' | 'online' | 'rules';
 const codeFromUrl = () => new URLSearchParams(location.search).get('sala')?.toUpperCase() ?? null;
@@ -30,7 +34,7 @@ export function App() {
   if (screen === 'rules')
     return (
       <div className="setup">
-        <SetupHead title="Reglas" onBack={() => setScreen('home')} />
+        <SetupHead title={L('Reglas', 'Rules')} onBack={() => setScreen('home')} />
         <div className="sheet">
           <Rules />
         </div>
@@ -41,17 +45,20 @@ export function App() {
       <div className="home-bg" style={{ backgroundImage: `url(${PORTADA})` }} />
       <img className="cover solo-movil" src={PORTADA} alt="REGIUM" />
       <img className="titulo-pc solo-pc" src="/ui/titulo.webp" alt="REGIUM" />
+      <button className="lang-toggle" onClick={() => setLang(EN ? 'es' : 'en')} aria-label={L('English', 'Español')}>
+        {EN ? 'ES' : 'EN'}
+      </button>
       <div className="home-content">
         <div className="menu">
           <button className="start" onClick={() => setScreen('online')}>
-            Jugar online
+            {L('Jugar online', 'Play online')}
           </button>
           <button className="start" onClick={() => setScreen('local-setup')}>
-            Jugar aquí
+            {L('Jugar aquí', 'Play here')}
           </button>
           {loadLocal() && (
             <button className="link" onClick={() => setScreen('local')}>
-              Continuar la partida guardada
+              {L('Continuar la partida guardada', 'Continue saved game')}
             </button>
           )}
         </div>
@@ -81,7 +88,7 @@ function Trono({
 }) {
   return (
     <div className={`trono ${state}`} style={{ ['--rc' as string]: REINO_INFO[reino].color, ['--tc' as string]: TEXTO_REINO[reino] }}>
-      <button className="trono-img" onClick={onClick} disabled={!onClick} aria-label={REINO_INFO[reino].nombre}>
+      <button className="trono-img" onClick={onClick} disabled={!onClick} aria-label={reinoName(reino)}>
         <img src={state === 'libre' ? escudoImg(reino) : regenteImg(reino)} alt="" draggable={false} />
       </button>
       <div className="trono-caption">{caption}</div>
@@ -95,7 +102,7 @@ function Trono({
 function SetupHead({ title, onBack, children }: { title: string; onBack: () => void; children?: React.ReactNode }) {
   return (
     <header className="setup-head">
-      <CoinButton glyph="←" label="Volver" onClick={onBack} />
+      <CoinButton glyph="←" label={L('Volver', 'Back')} onClick={onBack} />
       <h1>{title}</h1>
       <div className="setup-head-right">{children}</div>
     </header>
@@ -130,7 +137,7 @@ function saveLocal(s: LocalSave | null) {
 
 function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => void }) {
   const [seats, setSeats] = useState<Record<Reino, LocalSeat | null>>(() => ({
-    rojo: { reino: 'rojo', kind: 'human', name: 'Jugador 1' },
+    rojo: { reino: 'rojo', kind: 'human', name: L('Jugador 1', 'Player 1') },
     verde: { reino: 'verde', kind: 'dificil', name: '' },
     amarillo: { reino: 'amarillo', kind: 'dificil', name: '' },
     azul: null,
@@ -141,7 +148,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
   const set = (r: Reino, v: LocalSeat | null) => setSeats({ ...seats, [r]: v });
   const start = () => {
     const players = chosen.map((s, i) => ({
-      name: s.kind === 'human' ? s.name.trim() || `Jugador ${i + 1}` : REINO_INFO[s.reino].nombre,
+      name: s.kind === 'human' ? s.name.trim() || `${L('Jugador', 'Player')} ${i + 1}` : REINO_INFO[s.reino].nombre,
       reino: s.reino,
     }));
     const game = createGame(players, Math.floor(Math.random() * 2 ** 31));
@@ -152,11 +159,11 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
   const cycle = (r: Reino) => {
     const cur = seats[r]?.kind ?? null;
     const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
-    set(r, next ? { reino: r, kind: next, name: seats[r]?.name || (next === 'human' ? `Jugador ${humans + 1}` : '') } : null);
+    set(r, next ? { reino: r, kind: next, name: seats[r]?.name || (next === 'human' ? `${L('Jugador', 'Player')} ${humans + 1}` : '') } : null);
   };
   return (
     <div className="setup">
-      <SetupHead title="Jugar aquí" onBack={onBack} />
+      <SetupHead title={L('Jugar aquí', 'Play here')} onBack={onBack} />
       <div className="tronos">
         {REINOS.map((r) => {
           const s = seats[r];
@@ -165,11 +172,11 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
               key={r}
               reino={r}
               state={!s ? 'libre' : s.kind === 'human' ? 'mio' : 'ocupado'}
-              caption={!s ? 'Libre' : s.kind === 'human' ? 'Persona' : `Bot ${BOT_LABEL[s.kind]}`}
+              caption={!s ? L('Libre', 'Free') : s.kind === 'human' ? L('Persona', 'Human') : botLabel(s.kind)}
               onClick={() => cycle(r)}
             >
               {s?.kind === 'human' && (
-                <input value={s.name} maxLength={20} placeholder="Nombre" onChange={(e) => set(r, { ...s, name: e.target.value })} />
+                <input value={s.name} maxLength={20} placeholder={L('Nombre', 'Name')} onChange={(e) => set(r, { ...s, name: e.target.value })} />
               )}
             </Trono>
           );
@@ -177,7 +184,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
       </div>
       <div className="setup-foot">
         <button className="start" disabled={chosen.length < 2 || humans < 1} onClick={start}>
-          Empezar la guerra
+          {L('Empezar la guerra', 'Start the war')}
         </button>
       </div>
     </div>
@@ -229,7 +236,7 @@ function LocalGame({ onExit }: { onExit: () => void }) {
       update(applyAction(g, viewSeat, a));
       return null;
     } catch (e) {
-      return e instanceof RuleError ? e.message : 'Error inesperado.';
+      return trError(e instanceof RuleError ? e.message : 'Error inesperado.');
     }
   };
   const exit = () => {
@@ -244,12 +251,14 @@ function LocalGame({ onExit }: { onExit: () => void }) {
       <div className="curtain" style={{ backgroundImage: `url(${pergaminoImg(g.players[g.turn].reino)})` }}>
         <div className="curtain-box">
           <RegenteCard reino={g.players[g.turn].reino} />
-          <h2>Turno de {g.players[g.turn].name}</h2>
+          <h2>
+            {L('Turno de', 'Turn of')} {playerName(g.players[g.turn])}
+          </h2>
           <button className="start" onClick={() => setRevealed(g.turn)}>
-            Ver mis cartas
+            {L('Ver mis cartas', 'Show my cards')}
           </button>
           <button className="link" onClick={exit}>
-            Salir
+            {L('Salir', 'Exit')}
           </button>
         </div>
       </div>
@@ -343,7 +352,7 @@ function Online({ onExit }: { onExit: () => void }) {
       <div className="setup">
         <SetupHead title="Online" onBack={exit} />
         <div className="online-entry">
-          <input className="big-input" value={name} maxLength={20} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" />
+          <input className="big-input" value={name} maxLength={20} onChange={(e) => setName(e.target.value)} placeholder={L('Tu nombre', 'Your name')} />
           <button
             className="start"
             disabled={!connected}
@@ -352,10 +361,10 @@ function Online({ onExit }: { onExit: () => void }) {
               entered(await call('createRoom', { name }));
             }}
           >
-            Crear partida
+            {L('Crear partida', 'Create game')}
           </button>
           <div className="join-row">
-            <input className="big-input code" value={code} maxLength={5} placeholder="CÓDIGO" onChange={(e) => setCode(e.target.value.toUpperCase())} />
+            <input className="big-input code" value={code} maxLength={5} placeholder={L('CÓDIGO', 'CODE')} onChange={(e) => setCode(e.target.value.toUpperCase())} />
             <button
               className="start"
               disabled={code.trim().length < 5 || !connected}
@@ -364,7 +373,7 @@ function Online({ onExit }: { onExit: () => void }) {
                 entered(await call('joinRoom', { code, name }));
               }}
             >
-              Unirse
+              {L('Unirse', 'Join')}
             </button>
           </div>
           {error && <div className="error">{error}</div>}
@@ -414,14 +423,14 @@ function Lobby({
   return (
     <div className="setup">
       <SetupHead title={room.code} onBack={() => run('leave').then(onExit)}>
-        <CoinButton glyph="⤴" label={copied ? 'Copiado' : 'Invitar'} onClick={share} />
+        <CoinButton glyph="⤴" label={copied ? L('Copiado', 'Copied') : L('Invitar', 'Invite')} onClick={share} />
       </SetupHead>
       <div className="tronos">
         {REINOS.map((r) => {
           const holder = room.players.find((p) => p.reino === r);
           if (!holder)
             return (
-              <Trono key={r} reino={r} state="libre" caption="Libre" onClick={() => run('lobby', { reino: r, ready: true })}>
+              <Trono key={r} reino={r} state="libre" caption={L('Libre', 'Free')} onClick={() => run('lobby', { reino: r, ready: true })}>
                 {host && room.players.length < 5 && (
                   <CoinButton glyph="+" label="Bot" onClick={() => run('addBot', { reino: r, level: 'facil' })} />
                 )}
@@ -433,15 +442,15 @@ function Lobby({
               key={r}
               reino={r}
               state={mine ? 'mio' : 'ocupado'}
-              caption={holder.bot ? `Bot ${BOT_LABEL[holder.bot]}` : holder.name}
-              sub={!holder.bot && !holder.online ? 'desconectado' : undefined}
+              caption={holder.bot ? botLabel(holder.bot) : holder.name}
+              sub={!holder.bot && !holder.online ? L('desconectado', 'offline') : undefined}
               onClick={
                 host && holder.bot
                   ? () => run('botLevel', { playerId: holder.id, level: holder.bot === 'facil' ? 'dificil' : 'facil' })
                   : undefined
               }
             >
-              {host && holder.bot && <CoinButton glyph="✕" label="Quitar" onClick={() => run('removeBot', { playerId: holder.id })} />}
+              {host && holder.bot && <CoinButton glyph="✕" label={L('Quitar', 'Remove')} onClick={() => run('removeBot', { playerId: holder.id })} />}
             </Trono>
           );
         })}
@@ -451,12 +460,12 @@ function Lobby({
           className="big-input"
           defaultValue={me.name}
           maxLength={20}
-          placeholder="Tu nombre"
+          placeholder={L('Tu nombre', 'Your name')}
           onBlur={(e) => e.target.value !== me.name && run('lobby', { name: e.target.value })}
         />
         {host && (
           <button className="start" disabled={!allReady} onClick={() => run('start')}>
-            Iniciar la guerra
+            {L('Iniciar la guerra', 'Start the war')}
           </button>
         )}
       </div>
@@ -485,7 +494,7 @@ function OnlineGame({
   const host = room.hostId === me.id;
   return (
     <>
-      {!connected && <div className="banner">Reconectando…</div>}
+      {!connected && <div className="banner">{L('Reconectando…', 'Reconnecting…')}</div>}
       {error && <div className="banner error">{error}</div>}
       <Table
         game={g}
@@ -502,7 +511,7 @@ function OnlineGame({
           if (!host || !p || p.bot || p.online || g.phase === 'GAME_OVER') return null;
           return (
             <button className="small" onClick={() => call('takeover', { playerId: p.id })}>
-              Ceder al bot
+              {L('Ceder al bot', 'Hand over to bot')}
             </button>
           );
         }}

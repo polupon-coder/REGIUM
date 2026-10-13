@@ -1,6 +1,10 @@
 // Reglamento dentro del juego: se genera a partir de docs/REGLAMENTO.md (única fuente de verdad).
 import { Fragment, type ReactNode } from 'react';
-import md from '../../docs/REGLAMENTO.md?raw';
+import mdEs from '../../docs/REGLAMENTO.md?raw';
+import mdEn from '../../docs/RULES.md?raw';
+import { EN } from './i18n';
+
+const md = EN ? mdEn : mdEs;
 
 function inline(text: string): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).map((part, i) =>

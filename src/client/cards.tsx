@@ -1,4 +1,5 @@
 // Imágenes de las cartas y piezas visuales reutilizables.
+import { L, reinoName } from './i18n';
 import { REINO_INFO, type Card, type Player, type Reino, type WarChanges } from '../engine';
 
 const img = (name: string) => `/cartas/${name}.webp`;
@@ -37,7 +38,7 @@ export function Tropa({
   className?: string;
   title?: string;
 }) {
-  const label = title ?? `${card.valor} del ${REINO_INFO[card.reino].nombre}`;
+  const label = title ?? L(`${card.valor} del ${reinoName(card.reino)}`, `${card.valor} of the ${reinoName(card.reino)}`);
   const cls = `tropa ${dim ? 'dim' : ''} ${onClick && !disabled ? 'playable' : ''} ${className}`;
   if (onClick)
     return (
@@ -57,7 +58,7 @@ export function RegenteCard({ reino, flipped, small }: { reino: Reino; flipped?:
   return (
     <div className={`regente ${flipped ? 'flipped' : ''} ${small ? 'small' : ''}`}>
       <div className="regente-inner">
-        <img className="front" src={regenteImg(reino)} alt={`Regente del ${REINO_INFO[reino].nombre}`} draggable={false} />
+        <img className="front" src={regenteImg(reino)} alt={L(`Regente del ${reinoName(reino)}`, `Regent of the ${reinoName(reino)}`)} draggable={false} />
         <img className="back" src={escudoImg(reino)} alt={`Escudo: ${REINO_INFO[reino].escudo}`} draggable={false} />
       </div>
     </div>
@@ -101,11 +102,11 @@ export function Lugares({
     return k < C + T + cambios.territoriosPerdidos ? ' perdido' : '';
   };
   return (
-    <div className={`lugares ${size}`} style={{ ['--nl' as string]: Math.max(1, player.ciudades + player.territorios) }} aria-label={`${player.ciudades} ciudades y ${player.territorios} territorios`}>
+    <div className={`lugares ${size}`} style={{ ['--nl' as string]: Math.max(1, player.ciudades + player.territorios) }} aria-label={L(`${player.ciudades} ciudades y ${player.territorios} territorios`, `${player.ciudades} cities and ${player.territorios} territories`)}>
       {slots.map((s) =>
         s.tipo === 'reserva' ? (
           marca(s.i - 1) ? (
-            <span key={s.i} className="lugar territorio perdido" title="Territorio conquistado">
+            <span key={s.i} className="lugar territorio perdido" title={L('Territorio conquistado', 'Conquered territory')}>
               <img src={lugarImg(player.reino, 'territorio', s.i)} alt="" draggable={false} />
             </span>
           ) : (
@@ -114,14 +115,14 @@ export function Lugares({
         ) : (
           (() => {
             const target = (s.tipo === 'ciudad' && targetCity) || (s.tipo === 'territorio' && targetTerritory);
-            const title = s.tipo === 'ciudad' ? 'Ciudad' : 'Territorio';
+            const title = s.tipo === 'ciudad' ? L('Ciudad', 'City') : L('Territorio', 'Territory');
             const im = <img src={lugarImg(player.reino, s.tipo, s.i)} alt="" draggable={false} />;
             return target && onClick ? (
               <button
                 key={s.i}
                 className={`lugar ${s.tipo} target`}
                 onClick={() => onClick(s.tipo as 'ciudad' | 'territorio')}
-                title={s.tipo === 'ciudad' ? 'Arrasar esta ciudad (1 victoria)' : 'Conquistar este territorio (2 victorias)'}
+                title={s.tipo === 'ciudad' ? L('Arrasar esta ciudad (1 victoria)', 'Raze this city (1 victory)') : L('Conquistar este territorio (2 victorias)', 'Conquer this territory (2 victories)')}
               >
                 {im}
               </button>
@@ -139,7 +140,7 @@ export function Lugares({
 
 export function CityCount({ player }: { player: Player }) {
   return (
-    <span className="city-count" title={`${player.ciudades} ciudades · ${player.territorios} territorios`}>
+    <span className="city-count" title={L(`${player.ciudades} ciudades · ${player.territorios} territorios`, `${player.ciudades} cities · ${player.territorios} territories`)}>
       <b>{player.ciudades}</b>
       <small>/7</small>
     </span>

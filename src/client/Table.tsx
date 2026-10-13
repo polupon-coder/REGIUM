@@ -20,6 +20,7 @@ import { fondoImg, Lugares, lugarImg, pergaminoImg, preloadCards, regenteImg, Tr
 import { Chart } from './Chart';
 import { isMuted, play, toggleMuted, type Sound } from './sounds';
 import { Rules } from './Rules';
+import { colorName, EN, L, playerName, reinoName, trError } from './i18n';
 
 /** Color de texto de cada reino (más claro que el del marco, para leerse sobre fondo oscuro). */
 export const TEXTO_REINO: Record<Reino, string> = {
@@ -63,6 +64,8 @@ interface Notice {
   winner?: number;
   /** Resumen de una guerra (índice en history). */
   summary?: number;
+  /** Sonido que acompaña a la ventana. */
+  snd?: Sound;
 }
 
 export function Table({
@@ -96,7 +99,7 @@ export function Table({
   const imp = imperial(g);
   const me = mySeat !== null ? g.players[mySeat] : null;
   const myTurn = mySeat !== null && g.turn === mySeat && g.phase !== 'GAME_OVER';
-  const name = (s: number) => (s === mySeat ? 'Tú' : g.players[s].name);
+  const name = (s: number) => (s === mySeat ? L('Tú', 'You') : playerName(g.players[s]));
   /** Nombre del jugador en el color de su reino. */
   const who = (s: number) => <Rn r={g.players[s].reino}>{name(s)}</Rn>;
 
@@ -125,10 +128,10 @@ export function Table({
         add(big, {
           big: true,
           tone: w === mySeat ? 'good' : undefined,
-          title: w === mySeat ? <Rn r={g.players[w].reino}>Ganas la batalla</Rn> : <>Gana {who(w)}</>,
+          title: w === mySeat ? <Rn r={g.players[w].reino}>{L('Ganas la batalla', 'You win the battle')}</Rn> : <>{L('Gana', '')} {who(w)}{L('', ' wins')}</>,
           text: (
             <>
-              con el <Rn r={card.reino}>{card.valor} {REINO_INFO[card.reino].nombre.replace('Reino ', '').toLowerCase()}</Rn>
+              {L('con el', 'with the')} <Rn r={card.reino}>{card.valor} {colorName(card.reino)}</Rn>
             </>
           ),
           plays: g.lastTrick.plays,
@@ -146,7 +149,7 @@ export function Table({
               title: who(i),
               text: (
                 <>
-                  apuesta <b className="num">{pl.bid}</b> {pl.bid === 1 ? 'batalla' : 'batallas'}
+                  {L('apuesta', 'bids')} <b className="num">{pl.bid}</b> {pl.bid === 1 ? L('batalla', 'battle') : L('batallas', 'battles')}
                 </>
               ),
             });
@@ -160,7 +163,8 @@ export function Table({
             tone: 'bad',
             img: regenteImg(g.players[mySeat].reino),
             imgKind: 'regente',
-            title: 'Fallaste',
+            title: L('Fallaste', 'You missed'),
+            snd: 'derrota',
             text: `⚔ ${w.won[mySeat]}/${w.bids[mySeat]}`,
           });
       }
@@ -171,15 +175,16 @@ export function Table({
         const built = Math.max(0, b.ciudades - a.ciudades);
         const razed = Math.max(0, a.ciudades - b.ciudades);
         const netT = b.territorios - a.territorios + built - razed;
-        const quien = p.turn !== mySeat ? who(p.turn) : 'Un rival';
+        const quien = p.turn !== mySeat ? who(p.turn) : L('Un rival', 'A rival');
         if (netT > 0)
           add(big, {
             big: true,
             tone: 'good',
             img: lugarImg(b.reino, 'territorio', Math.min(7, b.ciudades + b.territorios)),
             imgKind: 'lugar',
-            title: 'Nuevo territorio',
-            text: 'Has acertado',
+            title: L('Nuevo territorio', 'New territory'),
+            text: L('Has acertado', 'You met your bid'),
+            snd: 'conquista',
           });
         for (let k = 0; k < built; k++)
           add(big, {
@@ -187,8 +192,9 @@ export function Table({
             tone: 'good',
             img: lugarImg(b.reino, 'ciudad', b.ciudades - built + k + 1),
             imgKind: 'lugar',
-            title: 'Nueva ciudad',
-            text: `Conviertes un territorio en ciudad. Llevas ${b.ciudades - built + k + 1} de 7.`,
+            title: L('Nueva ciudad', 'New city'),
+            text: L(`Conviertes un territorio en ciudad. Llevas ${b.ciudades - built + k + 1} de 7.`, `A territory becomes a city. You have ${b.ciudades - built + k + 1} of 7.`),
+            snd: 'construir',
           });
         if (razed > 0)
           add(big, {
@@ -196,8 +202,8 @@ export function Table({
             tone: 'bad',
             img: lugarImg(b.reino, 'ciudad', a.ciudades),
             imgKind: 'lugar',
-            title: 'Ciudad arrasada',
-            text: <>{quien} arrasa una de tus ciudades: vuelve a ser territorio.</>,
+            title: L('Ciudad arrasada', 'City razed'),
+            text: L(<>{quien} arrasa una de tus ciudades: vuelve a ser territorio.</>, <>{quien} razes one of your cities: it is a territory again.</>),
           });
         if (netT < 0)
           add(big, {
@@ -205,8 +211,8 @@ export function Table({
             tone: 'bad',
             img: lugarImg(b.reino, 'territorio', Math.max(1, a.ciudades + a.territorios)),
             imgKind: 'lugar',
-            title: 'Territorio conquistado',
-            text: <>{quien} te arrebata un territorio.</>,
+            title: L('Territorio conquistado', 'Territory conquered'),
+            text: L(<>{quien} te arrebata un territorio.</>, <>{quien} takes one of your territories.</>),
           });
       }
       // Fin de una guerra: resumen y anuncio de la siguiente
@@ -226,13 +232,9 @@ export function Table({
             : null;
       if (newPlay) sounds.push(newPlay.card.valor === 10 ? 'rugido' : 'ficha');
       for (const x of big) {
-        const t = typeof x.title === 'string' ? x.title : '';
         if (x.plays) sounds.push(x.winner === mySeat ? 'celebracion' : 'batalla');
         else if (x.summary !== undefined) continue;
-        else if (t.startsWith('Guerra')) sounds.push('fe');
-        else if (t === 'Nuevo territorio') sounds.push('conquista');
-        else if (t === 'Nueva ciudad') sounds.push('construir');
-        else if (t === 'Fallaste') sounds.push('derrota');
+        else if (x.snd) sounds.push(x.snd);
         else if (x.tone === 'bad') sounds.push('destruccion');
       }
       if (g.phase === 'GAME_OVER' && p.phase !== 'GAME_OVER')
@@ -260,7 +262,7 @@ export function Table({
     setBusy(true);
     const err = await send(a);
     setBusy(false);
-    setError(err ?? '');
+    setError(trError(err ?? ''));
   };
 
   // Orden en la mesa: yo abajo; los demás arriba, empezando por mi izquierda
@@ -276,17 +278,19 @@ export function Table({
   return (
     <div className={`table tab-${tab}`} data-np={n} style={{ ['--imp' as string]: REINO_INFO[imp].color, ['--np' as string]: n }}>
       <header className="topbar">
-        <span className={`imp-gem ${imp === 'amarillo' ? 'claro' : ''}`} style={{ ['--gc' as string]: imp === 'amarillo' ? '#ffd000' : REINO_INFO[imp].color }} title={`La guerra tiene lugar en el ${REINO_INFO[imp].nombre}`} />
+        <span className={`imp-gem ${imp === 'amarillo' ? 'claro' : ''}`} style={{ ['--gc' as string]: imp === 'amarillo' ? '#ffd000' : REINO_INFO[imp].color }} title={L(`La guerra tiene lugar en el ${reinoName(imp)}`, `The war takes place in the ${reinoName(imp)}`)} />
         <div className="war-info">
           <span className="war-n">
-            Guerra <b>{g.war + 1}</b>/{GUERRAS.length}
+            {L('Guerra', 'War')} <b>{g.war + 1}</b>/{GUERRAS.length}
           </span>
           <span className="war-b">
-            {g.phase === 'PLAY' ? `Batalla ${Math.min(g.battle + 1, batallas(g))}/${batallas(g)}` : `${batallas(g)} ${batallas(g) === 1 ? 'batalla' : 'batallas'}`}
+            {g.phase === 'PLAY'
+              ? `${L('Batalla', 'Battle')} ${Math.min(g.battle + 1, batallas(g))}/${batallas(g)}`
+              : `${batallas(g)} ${batallas(g) === 1 ? L('batalla', 'battle') : L('batallas', 'battles')}`}
           </span>
         </div>
         <div className="top-coins">
-          <CoinButton glyph="☰" label="Menú" onClick={() => setPanel(panel === 'menu' ? 'none' : 'menu')} />
+           <CoinButton glyph="☰" label={L('Menú', 'Menu')} onClick={() => setPanel(panel === 'menu' ? 'none' : 'menu')} />
         </div>
       </header>
 
@@ -294,7 +298,7 @@ export function Table({
         <section className={`me-chip-row ${myTurn ? 'turn' : ''}`} style={{ ['--rc' as string]: REINO_INFO[me.reino].color }}>
           <div className="me-side left">
             <span>
-              {me.name}
+              {playerName(me)}
               {g.emperor === mySeat && <span className="crown"> ♛</span>}
             </span>
           </div>
@@ -348,7 +352,7 @@ export function Table({
           <div className="mine-head">
             <img className="mine-face" src={regenteImg(me.reino)} alt="" />
             <span className="pname">
-              <Rn r={me.reino}>{me.name}</Rn> {g.emperor === mySeat && <span className="crown">♛</span>}
+              <Rn r={me.reino}>{playerName(me)}</Rn> {g.emperor === mySeat && <span className="crown">♛</span>}
             </span>
             <BidLine g={g} seat={mySeat} />
             <span className="cities">
@@ -379,20 +383,20 @@ export function Table({
 
       <nav className="tabbar">
         <button className={`start ${tab === 'batalla' ? 'on' : ''}`} onClick={() => setTab('batalla')}>
-          ⚔ Batalla
+          ⚔ {L('Batalla', 'Battle')}
         </button>
         <button className={`start ${tab === 'reinos' ? 'on' : ''}`} onClick={() => setTab('reinos')}>
-          ♜ Reinos{resolve && (resolve.destroyCity.length > 0 || resolve.destroyTerritory.length > 0) ? ' •' : ''}
+          ♜ {L('Reinos', 'Kingdoms')}{resolve && (resolve.destroyCity.length > 0 || resolve.destroyTerritory.length > 0) ? ' •' : ''}
         </button>
       </nav>
 
       {panel === 'menu' && (
         <div className="overlay soft" onClick={() => setPanel('none')}>
           <div className="menu-box framed" onClick={(e) => e.stopPropagation()}>
-            <CoinButton glyph="¶" label="Crónica" onClick={() => setPanel('log')} big />
-            <CoinButton glyph="§" label="Reglas" onClick={() => setPanel('rules')} big />
-            <CoinButton glyph={muted ? '♪̸' : '♪'} label={muted ? 'Sin sonido' : 'Sonido'} onClick={() => setMuted(toggleMuted())} big />
-            <CoinButton glyph="✕" label="Salir" onClick={onExit} big />
+            <CoinButton glyph="¶" label={L('Crónica', 'Chronicle')} onClick={() => setPanel('log')} big />
+            <CoinButton glyph="§" label={L('Reglas', 'Rules')} onClick={() => setPanel('rules')} big />
+            <CoinButton glyph={muted ? '♪̸' : '♪'} label={muted ? L('Sin sonido', 'Muted') : L('Sonido', 'Sound')} onClick={() => setMuted(toggleMuted())} big />
+            <CoinButton glyph="✕" label={L('Salir', 'Exit')} onClick={onExit} big />
           </div>
         </div>
       )}
@@ -433,15 +437,15 @@ export function Table({
       )}
       {g.phase === 'GAME_OVER' && <GameOver g={g} name={name} onExit={onExit} />}
       {panel === 'rules' && (
-        <Drawer title="Reglas" onClose={() => setPanel('none')}>
+        <Drawer title={L('Reglas', 'Rules')} onClose={() => setPanel('none')}>
           <Rules />
         </Drawer>
       )}
       {panel === 'log' && (
-        <Drawer title="Crónica" onClose={() => setPanel('none')}>
+        <Drawer title={L('Crónica', 'Chronicle')} onClose={() => setPanel('none')}>
           <ol className="log">
             {[...g.log].reverse().map((l) => (
-              <li key={l.n}>{l.text}</li>
+              <li key={l.n}>{EN && l.en ? l.en : l.text}</li>
             ))}
           </ol>
         </Drawer>
@@ -457,12 +461,13 @@ function warNotice(g: GameState, name: (s: number) => string): Omit<Notice, 'id'
     big: true,
     img: pergaminoImg(r),
     imgKind: 'pergamino',
-    title: `Guerra ${g.war + 1}`,
+    title: `${L('Guerra', 'War')} ${g.war + 1}`,
     text: (
       <>
-        <Rn r={r}>{REINO_INFO[r].nombre}</Rn>
+        <Rn r={r}>{reinoName(r)}</Rn>
       </>
     ),
+    snd: 'fe',
   };
 }
 
@@ -472,7 +477,7 @@ function BidLine({ g, seat }: { g: GameState; seat: number }) {
   if (p.bid === null) return <span className="bidline muted">⚔ –</span>;
   const cls = g.phase === 'RESOLVE' ? (p.won === p.bid ? 'hit' : 'miss') : '';
   return (
-    <span className={`bidline ${cls}`} title="Batallas ganadas / apuesta">
+    <span className={`bidline ${cls}`} title={L('Batallas ganadas / apuesta', 'Battles won / bid')}>
       ⚔ <b>{p.won}</b>/{p.bid}
     </span>
   );
@@ -509,8 +514,8 @@ function SeatPanel({
           </div>
           <BidLine g={g} seat={seat} />
           <div className="meta">
-            {p.handCount} {p.handCount === 1 ? 'tropa' : 'tropas'}
-            {meta.bot ? ' · bot' : meta.online === false ? ' · desconectado' : ''}
+            {p.handCount} {p.handCount === 1 ? L('tropa', 'troop') : L('tropas', 'troops')}
+            {meta.bot ? ' · bot' : meta.online === false ? L(' · desconectado', ' · offline') : ''}
           </div>
         </div>
         <span className="cities">
@@ -552,18 +557,19 @@ function Status({ g, mySeat, name }: { g: GameState; mySeat: number | null; name
   const mine = g.turn === mySeat;
   const n = (s: number) => <Rn r={g.players[s].reino}>{name(s)}</Rn>;
   let text: ReactNode = null;
-  if (g.phase === 'BID') text = mine ? null : <>{n(g.turn)} decide su apuesta…</>;
+  if (g.phase === 'BID') text = mine ? null : <>{n(g.turn)} {L('decide su apuesta…', 'is choosing a bid…')}</>;
   else if (g.phase === 'PLAY') {
     if (g.trick.length === 0 && g.lastTrick && g.battle > 0) {
       const w = g.lastTrick.winner;
       text = (
         <>
-          {w === mySeat ? 'Ganas' : <>{n(w)} gana</>} la batalla. {mine ? 'Sales tú.' : <>Sale {n(g.turn)}.</>}
+          {w === mySeat ? L('Ganas', 'You win') : <>{n(w)} {L('gana', 'wins')}</>} {L('la batalla.', 'the battle.')}{' '}
+          {mine ? L('Sales tú.', 'You lead.') : <>{L('Sale', '')} {n(g.turn)}{L('.', ' leads.')}</>}
         </>
       );
-    } else if (g.trick.length === 0) text = mine ? 'Sales tú: juega una tropa.' : <>Sale {n(g.turn)}.</>;
-    else text = mine ? 'Tu turno: juega una tropa.' : <>Turno de {n(g.turn)}.</>;
-  } else if (g.phase === 'RESOLVE') text = mine ? null : <>{n(g.turn)} reparte sus victorias…</>;
+    } else if (g.trick.length === 0) text = mine ? L('Sales tú: juega una tropa.', 'You lead: play a troop.') : <>{L('Sale', '')} {n(g.turn)}{L('.', ' leads.')}</>;
+    else text = mine ? L('Tu turno: juega una tropa.', 'Your turn: play a troop.') : <>{L('Turno de', 'Turn of')} {n(g.turn)}.</>;
+  } else if (g.phase === 'RESOLVE') text = mine ? null : <>{n(g.turn)} {L('reparte sus victorias…', 'is spending victories…')}</>;
   if (!text) return null;
   return <div className={`status ${mine && g.phase !== 'GAME_OVER' ? 'mine' : ''}`}>{text}</div>;
 }
@@ -573,7 +579,7 @@ function BidPanel({ g, act, busy }: { g: GameState; act: (a: Action) => void; bu
   const n = batallas(g);
   return (
     <div className="bid-panel">
-      <div className="panel-title">Tu estrategia</div>
+      <div className="panel-title">{L('Tu estrategia', 'Your strategy')}</div>
       <div className="bids">
         {Array.from({ length: n + 1 }, (_, b) => (
           <button key={b} className="gem" disabled={busy || !allowed.includes(b)} onClick={() => act({ type: 'bid', n: b })}>
@@ -592,16 +598,16 @@ function ResolvePanel({ g, act, busy, onAttack }: { g: GameState; act: (a: Actio
   return (
     <div className="panel framed">
       <div className="panel-title">
-        Te {left === 1 ? 'queda' : 'quedan'} <b className="num">{left}</b> {left === 1 ? 'victoria' : 'victorias'}
+        {L(left === 1 ? 'Te queda' : 'Te quedan', 'You have')} <b className="num">{left}</b> {left === 1 ? L('victoria', 'victory') : L('victorias', 'victories')}{L('', ' left')}
       </div>
       <div className="resolve-actions">
-        <CoinButton glyph="♜" label="Levantar ciudad" disabled={busy || !o.build} onClick={() => act({ type: 'build' })} big />
+        <CoinButton glyph="♜" label={L('Levantar ciudad', 'Build city')} disabled={busy || !o.build} onClick={() => act({ type: 'build' })} big />
         {(o.destroyCity.length > 0 || o.destroyTerritory.length > 0) && onAttack && (
           <span className="mobile-only">
-            <CoinButton glyph="⚔" label="Atacar" onClick={onAttack} big />
+            <CoinButton glyph="⚔" label={L('Atacar', 'Attack')} onClick={onAttack} big />
           </span>
         )}
-        <CoinButton glyph="✓" label={left > 0 ? 'Terminar' : 'Continuar'} disabled={busy} onClick={() => act({ type: 'pass' })} big />
+        <CoinButton glyph="✓" label={left > 0 ? L('Terminar', 'Finish') : L('Continuar', 'Continue')} disabled={busy} onClick={() => act({ type: 'pass' })} big />
       </div>
 
     </div>
@@ -625,7 +631,7 @@ function WarSummary({ g, index, name, onClose }: { g: GameState; index: number; 
   return (
     <div className="overlay soft" onClick={onClose}>
       <div className="summary framed" onClick={(e) => e.stopPropagation()}>
-        <h2>Fin de la guerra {w.war + 1}</h2>
+        <h2>{L('Fin de la guerra', 'End of war')} {w.war + 1}</h2>
         <div className="sum-rows">
           {g.players.map((p, i) => {
             const ok = w.bids[i] === w.won[i];
@@ -637,7 +643,7 @@ function WarSummary({ g, index, name, onClose }: { g: GameState; index: number; 
                     <Rn r={p.reino}>{name(i)}</Rn>
                     {w.emperor === i && ' ♛'}
                   </div>
-                  <div className="sum-score" title="Ganadas / apuesta">
+                  <div className="sum-score" title={L('Ganadas / apuesta', 'Won / bid')}>
                     <span className="num">
                       {w.won[i]}/{w.bids[i]}
                     </span>
@@ -650,7 +656,7 @@ function WarSummary({ g, index, name, onClose }: { g: GameState; index: number; 
           })}
         </div>
         <button className="start" onClick={onClose}>
-          Continuar
+          {L('Continuar', 'Continue')}
         </button>
       </div>
     </div>
@@ -671,13 +677,21 @@ function GameOver({ g, name, onExit }: { g: GameState; name: (s: number) => stri
           ))}
         </div>
         <h1>
-          {winners.map((w) => name(w)).join(' y ')}{' '}
-          {winners.length > 1 ? 'comparten' : winners[0] !== undefined && name(winners[0]) === 'Tú' ? 'ganas' : 'gana'} la corona
+          {winners.map((w) => name(w)).join(L(' y ', ' and '))}{' '}
+          {winners.length > 1
+            ? L('comparten', 'share')
+            : winners[0] !== undefined && name(winners[0]) === L('Tú', 'You')
+              ? L('ganas', 'win')
+              : L('gana', 'wins')}{' '}
+          {L('la corona', 'the crown')}
         </h1>
         <p>
           {g.endReason === 'ciudades'
-            ? `Siete ciudades levantadas en la guerra ${g.war + 1}.`
-            : `Tras las ${GUERRAS.length} guerras, nadie levantó siete ciudades: manda quien más tiene.`}
+            ? L(`Siete ciudades levantadas en la guerra ${g.war + 1}.`, `Seven cities built in war ${g.war + 1}.`)
+            : L(
+                `Tras las ${GUERRAS.length} guerras, nadie levantó siete ciudades: manda quien más tiene.`,
+                `After ${GUERRAS.length} wars nobody built seven cities: whoever has the most rules.`,
+              )}
         </p>
         <div className="ranking">
           {ranking.map(({ p, i }) => (
@@ -691,7 +705,7 @@ function GameOver({ g, name, onExit }: { g: GameState; name: (s: number) => stri
         </div>
         <Chart g={g} name={name} />
         <button className="start" onClick={onExit}>
-          Volver al inicio
+          {L('Volver al inicio', 'Back to start')}
         </button>
       </div>
     </div>
@@ -703,7 +717,7 @@ function Drawer({ title, onClose, children }: { title: string; onClose: () => vo
     <aside className="drawer">
       <div className="drawer-head">
         <h2>{title}</h2>
-        <button onClick={onClose} aria-label="Cerrar">
+        <button onClick={onClose} aria-label={L('Cerrar', 'Close')}>
           ✕
         </button>
       </div>

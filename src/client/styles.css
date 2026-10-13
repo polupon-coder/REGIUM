@@ -2689,3 +2689,22 @@ button.seal:hover:not(:disabled) {
     padding-top: 14px !important;
   }
 }
+
+/* Portada: botón de idioma (moneda pequeña en la esquina) */
+.lang-toggle {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: url('/ui/boton.webp') center / cover no-repeat;
+  color: var(--parch, #f1e3c2);
+  font: 700 0.95rem/46px 'IM Fell English SC', Georgia, serif;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 2px #000;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #000a;
+}

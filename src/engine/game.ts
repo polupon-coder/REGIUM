@@ -4,13 +4,20 @@
 export const REINOS = ['rojo', 'verde', 'amarillo', 'azul', 'morado'] as const;
 export type Reino = (typeof REINOS)[number];
 
-export const REINO_INFO: Record<Reino, { nombre: string; escudo: string; color: string }> = {
-  rojo: { nombre: 'Reino Rojo', escudo: 'Dragón', color: '#9b2a2e' },
-  verde: { nombre: 'Reino Verde', escudo: 'Águila', color: '#5b7a3a' },
-  amarillo: { nombre: 'Reino Amarillo', escudo: 'Serpiente', color: '#d9b81c' },
-  azul: { nombre: 'Reino Azul', escudo: 'Cráneo astado', color: '#1f6b84' },
-  morado: { nombre: 'Reino Morado', escudo: 'Elefante', color: '#6e2a85' },
+export const REINO_INFO: Record<Reino, { nombre: string; name: string; colorEn: string; escudo: string; color: string }> = {
+  rojo: { nombre: 'Reino Rojo', name: 'Red Kingdom', colorEn: 'red', escudo: 'Dragón', color: '#9b2a2e' },
+  verde: { nombre: 'Reino Verde', name: 'Green Kingdom', colorEn: 'green', escudo: 'Águila', color: '#5b7a3a' },
+  amarillo: { nombre: 'Reino Amarillo', name: 'Yellow Kingdom', colorEn: 'yellow', escudo: 'Serpiente', color: '#d9b81c' },
+  azul: { nombre: 'Reino Azul', name: 'Blue Kingdom', colorEn: 'blue', escudo: 'Cráneo astado', color: '#1f6b84' },
+  morado: { nombre: 'Reino Morado', name: 'Purple Kingdom', colorEn: 'purple', escudo: 'Elefante', color: '#6e2a85' },
 };
+
+/** Nombre de un jugador en inglés: los bots se llaman como su reino y «Jugador N» pasa a «Player N». */
+export function nameEn(p: { name: string; reino: Reino }): string {
+  if (p.name === REINO_INFO[p.reino].nombre) return REINO_INFO[p.reino].name;
+  const m = /^Jugador (\d+)$/.exec(p.name);
+  return m ? `Player ${m[1]}` : p.name;
+}
 
 /** Número de batallas de cada guerra: 1, 2 … 10 (10 guerras). */
 export const GUERRAS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -70,6 +77,8 @@ export interface WarResult {
 export interface LogEntry {
   n: number;
   text: string;
+  /** El mismo texto en inglés. */
+  en?: string;
   seat?: number;
 }
 
@@ -241,13 +250,13 @@ export function createGame(players: { name: string; reino: Reino }[], seed: numb
     rng: seed | 0,
   };
   g.emperor = firstEmperor ?? Math.floor(next(g) * players.length);
-  log(g, `${g.players[g.emperor].name} es elegido Emperador por sorteo.`);
+  log(g, `${g.players[g.emperor].name} es elegido Emperador por sorteo.`, undefined, `${nameEn(g.players[g.emperor])} is chosen Emperor by lot.`);
   startWar(g);
   return g;
 }
 
-function log(g: GameState, text: string, seat?: number) {
-  g.log.push({ n: (g.log.at(-1)?.n ?? 0) + 1, text, seat });
+function log(g: GameState, text: string, seat?: number, en?: string) {
+  g.log.push({ n: (g.log.at(-1)?.n ?? 0) + 1, text, seat, en });
   if (g.log.length > 300) g.log.splice(0, g.log.length - 300);
 }
 
@@ -270,7 +279,7 @@ function startWar(g: GameState) {
   g.voids = g.players.map(() => []);
   g.resolved = [];
   g.actionsLeft = 0;
-  log(g, `Guerra ${g.war + 1}: ${n} ${n === 1 ? 'batalla' : 'batallas'}. Emperador: ${g.players[g.emperor].name}.`);
+  log(g, `Guerra ${g.war + 1}: ${n} ${n === 1 ? 'batalla' : 'batallas'}. Emperador: ${g.players[g.emperor].name}.`, undefined, `War ${g.war + 1}: ${n} ${n === 1 ? 'battle' : 'battles'}. Emperor: ${nameEn(g.players[g.emperor])}.`);
 }
 
 export function sortHand(hand: Card[], imp: Reino) {
@@ -293,7 +302,7 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
         throw new RuleError('Apuesta no válida.');
       }
       me.bid = action.n;
-      log(g, `${me.name} apuesta ${action.n}.`, seat);
+      log(g, `${me.name} apuesta ${action.n}.`, seat, `${nameEn(me)} bids ${action.n}.`);
       g.turn = nextSeat(g, seat);
       if (g.players.every((p) => p.bid !== null)) {
         g.phase = 'PLAY';
@@ -327,7 +336,7 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
       g.lastTrick = { plays: g.trick, winner: win.seat };
       g.trick = [];
       g.battle++;
-      log(g, `${g.players[win.seat].name} gana la batalla ${g.battle} con ${cardName(win.card)}.`, win.seat);
+      log(g, `${g.players[win.seat].name} gana la batalla ${g.battle} con ${cardName(win.card)}.`, win.seat, `${nameEn(g.players[win.seat])} wins battle ${g.battle} with the ${win.card.valor} ${REINO_INFO[win.card.reino].colorEn}.`);
       if (g.battle < batallas(g)) {
         g.turn = win.seat;
         return g;
@@ -343,7 +352,7 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
       me.ciudades++;
       g.actionsLeft--;
       note(g, seat, 'ciudades');
-      log(g, `${me.name} levanta una ciudad.`, seat);
+      log(g, `${me.name} levanta una ciudad.`, seat, `${nameEn(me)} builds a city.`);
       afterResolveAction(g);
       return g;
     }
@@ -357,7 +366,7 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
       g.actionsLeft--;
       note(g, seat, 'arrasa');
       note(g, action.target, 'ciudadesPerdidas');
-      log(g, `${me.name} arrasa una ciudad de ${t.name}.`, seat);
+      log(g, `${me.name} arrasa una ciudad de ${t.name}.`, seat, `${nameEn(me)} razes a city of ${nameEn(t)}.`);
       afterResolveAction(g);
       return g;
     }
@@ -370,13 +379,13 @@ export function applyAction(state: GameState, seat: number, action: Action): Gam
       g.actionsLeft -= 2;
       note(g, seat, 'conquista');
       note(g, action.target, 'territoriosPerdidos');
-      log(g, `${me.name} conquista un territorio de ${t.name}.`, seat);
+      log(g, `${me.name} conquista un territorio de ${t.name}.`, seat, `${nameEn(me)} conquers a territory of ${nameEn(t)}.`);
       afterResolveAction(g);
       return g;
     }
     case 'pass': {
       requireResolve(g);
-      if (g.actionsLeft > 0) log(g, `${me.name} renuncia a ${g.actionsLeft} ${g.actionsLeft === 1 ? 'victoria' : 'victorias'}.`, seat);
+      if (g.actionsLeft > 0) log(g, `${me.name} renuncia a ${g.actionsLeft} ${g.actionsLeft === 1 ? 'victoria' : 'victorias'}.`, seat, `${nameEn(me)} gives up ${g.actionsLeft} ${g.actionsLeft === 1 ? 'victory' : 'victories'}.`);
       g.actionsLeft = 0;
       nextResolver(g);
       return g;
@@ -432,12 +441,12 @@ function beginResolver(g: GameState) {
       if (reserva(p) > 0) {
         p.territorios++;
         note(g, g.turn, 'territorio');
-        log(g, `${p.name} acierta (${p.bid}) y gana un territorio.`, g.turn);
-      } else log(g, `${p.name} acierta (${p.bid}), pero ya tiene todos sus lugares en juego.`, g.turn);
+        log(g, `${p.name} acierta (${p.bid}) y gana un territorio.`, g.turn, `${nameEn(p)} meets the bid (${p.bid}) and gains a territory.`);
+      } else log(g, `${p.name} acierta (${p.bid}), pero ya tiene todos sus lugares en juego.`, g.turn, `${nameEn(p)} meets the bid (${p.bid}), but already has all lands in play.`);
       g.actionsLeft = p.won;
       if (g.actionsLeft > 0 && hasOptions(g)) return; // espera sus decisiones
     } else {
-      log(g, `${p.name} falla: apostó ${p.bid} y ganó ${p.won}.`, g.turn);
+      log(g, `${p.name} falla: apostó ${p.bid} y ganó ${p.won}.`, g.turn, `${nameEn(p)} misses: bid ${p.bid} and won ${p.won}.`);
     }
     g.actionsLeft = 0;
     g.resolved.push(g.turn);
@@ -450,7 +459,7 @@ function beginResolver(g: GameState) {
 function afterResolveAction(g: GameState) {
   if (checkWin(g)) return;
   if (g.actionsLeft > 0 && hasOptions(g)) return;
-  if (g.actionsLeft > 0) log(g, `${g.players[g.turn].name} no puede usar ${g.actionsLeft === 1 ? 'la victoria que le queda' : 'las victorias que le quedan'}.`);
+  if (g.actionsLeft > 0) log(g, `${g.players[g.turn].name} no puede usar ${g.actionsLeft === 1 ? 'la victoria que le queda' : 'las victorias que le quedan'}.`, undefined, `${nameEn(g.players[g.turn])} cannot use the remaining ${g.actionsLeft === 1 ? 'victory' : 'victories'}.`);
   g.actionsLeft = 0;
   nextResolver(g);
 }
@@ -469,7 +478,7 @@ function checkWin(g: GameState) {
   g.phase = 'GAME_OVER';
   g.winners = [g.turn];
   g.endReason = 'ciudades';
-  log(g, `¡${p.name} levanta su séptima ciudad y se proclama Rey de Reyes!`, g.turn);
+  log(g, `¡${p.name} levanta su séptima ciudad y se proclama Rey de Reyes!`, g.turn, `${nameEn(p)} builds the seventh city and is proclaimed King of Kings!`);
   return true;
 }
 
@@ -481,7 +490,7 @@ function endWar(g: GameState) {
     g.winners = g.players.map((p, i) => i).filter((i) => score(g.players[i]) === best);
     g.phase = 'GAME_OVER';
     g.endReason = 'guerras';
-    log(g, `Terminan las ${GUERRAS.length} guerras. ${g.winners.map((i) => g.players[i].name).join(' y ')} ${g.winners.length > 1 ? 'comparten' : 'se lleva'} la corona.`);
+    log(g, `Terminan las ${GUERRAS.length} guerras. ${g.winners.map((i) => g.players[i].name).join(' y ')} ${g.winners.length > 1 ? 'comparten' : 'se lleva'} la corona.`, undefined, `The ${GUERRAS.length} wars are over. ${g.winners.map((i) => nameEn(g.players[i])).join(' and ')} ${g.winners.length > 1 ? 'share' : 'takes'} the crown.`);
     return;
   }
   g.war++;
