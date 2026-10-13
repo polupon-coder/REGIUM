@@ -45,9 +45,6 @@ export function App() {
       <div className="home-bg" style={{ backgroundImage: `url(${PORTADA})` }} />
       <img className="cover solo-movil" src={PORTADA} alt="REGIUM" />
       <img className="titulo-pc solo-pc" src="/ui/titulo.webp" alt="REGIUM" />
-      <button className="lang-toggle" onClick={() => setLang(EN ? 'es' : 'en')} aria-label={L('English', 'Español')}>
-        {EN ? 'ES' : 'EN'}
-      </button>
       <div className="home-content">
         <div className="menu">
           <button className="start" onClick={() => setScreen('online')}>
@@ -61,6 +58,15 @@ export function App() {
               {L('Continuar la partida guardada', 'Continue saved game')}
             </button>
           )}
+          <div className="langs" role="group" aria-label="Idioma / Language">
+            <button className={!EN ? 'on' : ''} onClick={() => EN && setLang('es')} aria-pressed={!EN}>
+              Español
+            </button>
+            <span aria-hidden>·</span>
+            <button className={EN ? 'on' : ''} onClick={() => !EN && setLang('en')} aria-pressed={EN}>
+              English
+            </button>
+          </div>
         </div>
       </div>
     </div>
