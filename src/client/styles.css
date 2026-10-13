@@ -2796,7 +2796,7 @@ button.seal:hover:not(:disabled) {
   .home {
     background:
       linear-gradient(180deg, #0a0705cc 0%, #0a070522 22%, #0a070500 45%, #0a0705aa 72%, #0a0705f2 100%),
-      url('/ui/portada-pc.webp') 51% 100% / auto 108% no-repeat,
+      url('/ui/portada-pc.webp') 51% 100% / auto 124% no-repeat,
       #0a0705 !important;
   }
 }
