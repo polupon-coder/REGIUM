@@ -101,7 +101,7 @@ export function Lugares({
     return k < C + T + cambios.territoriosPerdidos ? ' perdido' : '';
   };
   return (
-    <div className={`lugares ${size}`} aria-label={`${player.ciudades} ciudades y ${player.territorios} territorios`}>
+    <div className={`lugares ${size}`} style={{ ['--nl' as string]: Math.max(1, player.ciudades + player.territorios) }} aria-label={`${player.ciudades} ciudades y ${player.territorios} territorios`}>
       {slots.map((s) =>
         s.tipo === 'reserva' ? (
           marca(s.i - 1) ? (

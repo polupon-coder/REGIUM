@@ -2653,3 +2653,27 @@ button.seal:hover:not(:disabled) {
     padding: 6px !important;
   }
 }
+
+/* Ordenador: en cada columna solo se ven los lugares que se tienen, tan grandes como quepan
+   (se hacen más pequeños a medida que se acercan a siete) */
+@media (min-width: 701px) {
+  .rivals .seat .lugares,
+  .my-lugares .lugares {
+    container-type: size;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .rivals .lugar,
+  .my-lugares .lugar {
+    width: min(100cqw, calc((100cqh - (var(--nl) - 1) * 4px) / var(--nl) * 88 / 63)) !important;
+    height: auto !important;
+    max-width: none;
+    flex: none !important;
+  }
+  .rivals .lugar.reserva,
+  .my-lugares .lugar.reserva {
+    display: none !important;
+  }
+}
