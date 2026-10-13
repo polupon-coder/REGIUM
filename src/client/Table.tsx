@@ -421,7 +421,7 @@ export function Table({
                 {currentBig.plays.map((pl) => (
                   <div key={pl.seat} className={`played ${pl.seat === currentBig.winner ? 'winner' : 'loser'}`}>
                     <Tropa card={pl.card} />
-                    <span className="who">{who(pl.seat)}</span>
+                    <span className="franja" title={name(pl.seat)} style={{ ['--rc' as string]: REINO_INFO[g.players[pl.seat].reino].color }} />
                   </div>
                 ))}
               </div>

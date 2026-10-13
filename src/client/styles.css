@@ -2363,3 +2363,12 @@ button.seal:hover:not(:disabled) {
   aspect-ratio: 88 / 63;
   object-fit: cover;
 }
+
+/* Aviso de batalla: franjas de color bajo las cartas y título que siempre cabe en el marco */
+.notice .played .franja {
+  height: 10px;
+}
+.notice h2 {
+  font-size: clamp(1.05rem, 5vw, 2rem);
+  max-width: 100%;
+}
