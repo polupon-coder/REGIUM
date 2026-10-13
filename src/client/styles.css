@@ -2758,3 +2758,12 @@ button.seal:hover:not(:disabled) {
     flex-basis: 100%;
   }
 }
+/* Esta ilustración ya es oscura: velo más ligero en el centro */
+@media (min-width: 701px) {
+  .home {
+    background:
+      linear-gradient(180deg, #0a0705b0 0%, #0a070533 28%, #0a070500 50%, #0a070599 78%, #0a0705e6 100%),
+      url('/ui/portada-pc.webp') center 35% / cover no-repeat,
+      #0a0705 !important;
+  }
+}
