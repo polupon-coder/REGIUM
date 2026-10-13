@@ -67,4 +67,4 @@ Las victorias que no se puedan o no se quieran usar se pierden. Quien **falla** 
   pueden ocupar con bots.
 - **Jugar aquí**: contra bots, por turnos entre varias personas en el mismo dispositivo
   (la pantalla se oculta al pasar el turno para que nadie vea las cartas ajenas), o mezclando ambos.
-- **Bots**: imaginan repartos posibles de las cartas que no ven (nunca miran las cartas de los demás) para decidir su estrategia y cada tropa; al repartir victorias levantan ciudades y frenan a quien está cerca de ganar.
+- **Bots**: hay dos niveles, fácil y difícil (se cambia tocando su regente al preparar la partida). El difícil imagina repartos posibles de las cartas que no ven (nunca miran las cartas de los demás) para decidir su estrategia y cada tropa; al repartir victorias levantan ciudades y frenan a quien está cerca de ganar. El fácil calcula menos y a veces se equivoca.

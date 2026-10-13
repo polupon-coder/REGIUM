@@ -16,6 +16,8 @@ import {
 
 export type BotLevel = 'facil' | 'normal' | 'dificil';
 export const BOT_LABEL: Record<BotLevel, string> = { facil: 'fácil', normal: 'medio', dificil: 'difícil' };
+/** Los dos niveles que se ofrecen al elegir bot. */
+export const BOT_NIVELES: BotLevel[] = ['facil', 'dificil'];
 
 type Rand = () => number;
 

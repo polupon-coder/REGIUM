@@ -8,6 +8,7 @@ import {
   RuleError,
   viewFor,
   type Action,
+  BOT_LABEL,
   type BotLevel,
   type GameState,
   type Reino,
@@ -147,7 +148,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
     saveLocal({ game, seats: chosen.map((s, i) => ({ name: players[i].name, bot: s.kind === 'human' ? null : s.kind })) });
     onStart();
   };
-  const CYCLE: (LocalSeat['kind'] | null)[] = [null, 'human', 'dificil'];
+  const CYCLE: (LocalSeat['kind'] | null)[] = [null, 'human', 'facil', 'dificil'];
   const cycle = (r: Reino) => {
     const cur = seats[r]?.kind ?? null;
     const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
@@ -164,7 +165,7 @@ function LocalSetup({ onBack, onStart }: { onBack: () => void; onStart: () => vo
               key={r}
               reino={r}
               state={!s ? 'libre' : s.kind === 'human' ? 'mio' : 'ocupado'}
-              caption={!s ? 'Libre' : s.kind === 'human' ? 'Persona' : 'Bot'}
+              caption={!s ? 'Libre' : s.kind === 'human' ? 'Persona' : `Bot ${BOT_LABEL[s.kind]}`}
               onClick={() => cycle(r)}
             >
               {s?.kind === 'human' && (
@@ -422,7 +423,7 @@ function Lobby({
             return (
               <Trono key={r} reino={r} state="libre" caption="Libre" onClick={() => run('lobby', { reino: r, ready: true })}>
                 {host && room.players.length < 5 && (
-                  <CoinButton glyph="+" label="Bot" onClick={() => run('addBot', { reino: r, level: 'normal' })} />
+                  <CoinButton glyph="+" label="Bot" onClick={() => run('addBot', { reino: r, level: 'facil' })} />
                 )}
               </Trono>
             );
@@ -432,8 +433,13 @@ function Lobby({
               key={r}
               reino={r}
               state={mine ? 'mio' : 'ocupado'}
-              caption={holder.bot ? 'Bot' : holder.name}
+              caption={holder.bot ? `Bot ${BOT_LABEL[holder.bot]}` : holder.name}
               sub={!holder.bot && !holder.online ? 'desconectado' : undefined}
+              onClick={
+                host && holder.bot
+                  ? () => run('botLevel', { playerId: holder.id, level: holder.bot === 'facil' ? 'dificil' : 'facil' })
+                  : undefined
+              }
             >
               {host && holder.bot && <CoinButton glyph="✕" label="Quitar" onClick={() => run('removeBot', { playerId: holder.id })} />}
             </Trono>

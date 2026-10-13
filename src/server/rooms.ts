@@ -266,7 +266,7 @@ export function addBot(room: Room, token: string, reino: Reino, level: BotLevel)
     name: REINO_INFO[reino].nombre,
     reino,
     ready: true,
-    bot: 'dificil',
+    bot: level,
   });
   save(room);
 }
@@ -277,6 +277,17 @@ export function removeBot(room: Room, token: string, playerId: number) {
   const p = room.players.find((x) => x.id === playerId);
   if (!p?.bot) throw new RoomError('Ese jugador no es una máquina.');
   room.players = room.players.filter((x) => x !== p);
+  save(room);
+}
+
+/** El anfitrión cambia el nivel de un bot antes de empezar. */
+export function setBotLevel(room: Room, token: string, playerId: number, level: BotLevel) {
+  requireHost(room, token);
+  if (room.game) throw new RoomError('La partida ya ha empezado.');
+  if (!validLevel(level)) throw new RoomError('Nivel no válido.');
+  const p = room.players.find((x) => x.id === playerId);
+  if (!p?.bot) throw new RoomError('Ese jugador no es una máquina.');
+  p.bot = level;
   save(room);
 }
 

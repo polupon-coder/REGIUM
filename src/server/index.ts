@@ -13,6 +13,7 @@ import {
   pendingBot,
   releaseTakeover,
   removeBot,
+  setBotLevel,
   takeover,
   createRoom,
   getRoom,
@@ -218,6 +219,14 @@ io.on('connection', (socket: Socket) => {
     handle(ack, () => {
       const { room, token } = current();
       addBot(room, token, data?.reino, data?.level);
+      broadcast(room);
+    }),
+  );
+
+  socket.on('botLevel', (data, ack) =>
+    handle(ack, () => {
+      const { room, token } = current();
+      setBotLevel(room, token, Number(data?.playerId), data?.level);
       broadcast(room);
     }),
   );
