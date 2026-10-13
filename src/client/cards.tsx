@@ -1,5 +1,5 @@
 // Imágenes de las cartas y piezas visuales reutilizables.
-import { REINO_INFO, type Card, type Player, type Reino } from '../engine';
+import { REINO_INFO, type Card, type Player, type Reino, type WarChanges } from '../engine';
 
 const img = (name: string) => `/cartas/${name}.webp`;
 export const tropaImg = (c: Card) => img(`tropa-${c.reino}-${String(c.valor).padStart(2, '0')}`);
@@ -73,9 +73,12 @@ export function Lugares({
   onClick,
   targetCity,
   targetTerritory,
+  cambios,
 }: {
   player: Player;
   size?: 'sm' | 'md' | 'lg';
+  /** Si se da, marca lo nuevo de esta guerra y lo perdido. */
+  cambios?: WarChanges;
   onClick?: LugarClick;
   targetCity?: boolean;
   targetTerritory?: boolean;
@@ -85,11 +88,29 @@ export function Lugares({
     const tipo = i < player.ciudades ? 'ciudad' : i < player.ciudades + player.territorios ? 'territorio' : 'reserva';
     slots.push({ tipo, i: i + 1 });
   }
+  const C = player.ciudades;
+  const T = player.territorios;
+  // nuevo: ciudades levantadas y territorio ganado; arrasada: ciudad que volvió a territorio; perdido: territorio conquistado
+  const marca = (k: number): string => {
+    if (!cambios) return '';
+    if (k < C) return k >= C - cambios.ciudades ? ' nuevo' : '';
+    if (k < C + T) {
+      if (k < C + cambios.ciudadesPerdidas) return ' arrasada';
+      return k >= C + T - cambios.territorio ? ' nuevo' : '';
+    }
+    return k < C + T + cambios.territoriosPerdidos ? ' perdido' : '';
+  };
   return (
     <div className={`lugares ${size}`} aria-label={`${player.ciudades} ciudades y ${player.territorios} territorios`}>
       {slots.map((s) =>
         s.tipo === 'reserva' ? (
-          <span key={s.i} className="lugar reserva" />
+          marca(s.i - 1) ? (
+            <span key={s.i} className="lugar territorio perdido" title="Territorio conquistado">
+              <img src={lugarImg(player.reino, 'territorio', s.i)} alt="" draggable={false} />
+            </span>
+          ) : (
+            <span key={s.i} className="lugar reserva" />
+          )
         ) : (
           (() => {
             const target = (s.tipo === 'ciudad' && targetCity) || (s.tipo === 'territorio' && targetTerritory);
@@ -105,7 +126,7 @@ export function Lugares({
                 {im}
               </button>
             ) : (
-              <span key={s.i} className={`lugar ${s.tipo}`} title={title}>
+              <span key={s.i} className={`lugar ${s.tipo}${marca(s.i - 1)}`} title={title}>
                 {im}
               </span>
             );

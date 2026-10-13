@@ -2245,3 +2245,121 @@ button.seal:hover:not(:disabled) {
 .sum-row .sum-name .rn {
   color: #fff !important;
 }
+
+/* Resumen de cada guerra: cabecera del reino y sus siete lugares, con las novedades marcadas */
+.sum-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+}
+.sum-head {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+.sum-head .sum-face {
+  width: 64px;
+}
+.sum-score .num {
+  color: #fff;
+  font-size: 1.05rem;
+  margin-right: 6px;
+}
+.sum-row .lugares {
+  gap: 4px;
+}
+.lugar.nuevo {
+  position: relative;
+  outline: 2px solid #f3d36b;
+  outline-offset: 1px;
+  box-shadow: 0 0 10px #f3d36bb0;
+}
+.lugar.nuevo::after {
+  content: '+';
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f3d36b;
+  color: #2a1a08;
+  font: 700 14px/16px Georgia, serif;
+  text-align: center;
+}
+.lugar.arrasada,
+.lugar.perdido {
+  position: relative;
+  outline: 2px solid #d9534f;
+  outline-offset: 1px;
+}
+.lugar.perdido img {
+  filter: grayscale(1) brightness(0.55);
+  opacity: 0.6;
+}
+.lugar.arrasada::after,
+.lugar.perdido::after {
+  content: '✕';
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #d9534f;
+  color: #fff;
+  font: 700 11px/16px sans-serif;
+  text-align: center;
+}
+
+/* Fin de partida: el título cabe siempre (puede ocupar dos líneas) y cada reino en su franja */
+.gameover h1 {
+  white-space: normal;
+  font-size: clamp(1.3rem, 6vw, 2.2rem);
+  line-height: 1.15;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.rank-row {
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--rc) 42%, transparent);
+}
+.rank-row .rank-name,
+.rank-row .rank-name .rn {
+  color: #fff !important;
+}
+
+/* Bajo cada carta jugada, una franja del color del reino que la jugó (sin texto) */
+.played .franja {
+  display: block;
+  width: 100%;
+  height: clamp(8px, 1.4vw, 12px);
+  background: color-mix(in srgb, var(--rc) 85%, transparent);
+}
+
+/* Cabecera del resumen alineada a la izquierda, con regentes del mismo tamaño */
+.sum-head {
+  display: flex;
+  justify-content: flex-start;
+}
+.sum-head .sum-face {
+  width: 64px !important;
+  height: auto;
+  flex: none;
+}
+.sum-head .sum-name {
+  flex: 1;
+  text-align: left;
+}
+.sum-row {
+  align-items: stretch;
+}
+.sum-head {
+  width: 100%;
+}
+.sum-head .sum-face {
+  aspect-ratio: 88 / 63;
+  object-fit: cover;
+}

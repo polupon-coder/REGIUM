@@ -541,9 +541,7 @@ function Battle({ g, name }: { g: GameState; name: (s: number) => string }) {
       {showing.plays.map((p) => (
         <div key={p.seat} className={`played ${showing.winner === p.seat ? 'winner' : ''}`}>
           <Tropa card={p.card} className={p.card.reino === imperial(g) ? 'imperial-card' : ''} />
-          <span className="who">
-            <Rn r={g.players[p.seat].reino}>{name(p.seat)}</Rn>
-          </span>
+          <span className="franja" title={name(p.seat)} style={{ ['--rc' as string]: REINO_INFO[g.players[p.seat].reino].color }} />
         </div>
       ))}
     </div>
@@ -620,19 +618,10 @@ export function CoinButton({ glyph, label, onClick, disabled, big }: { glyph: st
   );
 }
 
-/** Cartas que un jugador ha conseguido (o perdido) en una guerra. */
-function acquired(p: Player, c: GameState['history'][number]['changes'][number]) {
-  const out: { src: string; lost?: boolean }[] = [];
-  const total = Math.min(7, Math.max(1, p.ciudades + p.territorios));
-  if (c.territorio) out.push({ src: lugarImg(p.reino, 'territorio', total) });
-  for (let k = 0; k < c.ciudades; k++) out.push({ src: lugarImg(p.reino, 'ciudad', Math.max(1, p.ciudades - k)) });
-  for (let k = 0; k < c.ciudadesPerdidas; k++) out.push({ src: lugarImg(p.reino, 'ciudad', Math.min(7, p.ciudades + k + 1)), lost: true });
-  for (let k = 0; k < c.territoriosPerdidos; k++) out.push({ src: lugarImg(p.reino, 'territorio', Math.min(7, total + k + 1)), lost: true });
-  return out;
-}
-
 function WarSummary({ g, index, name, onClose }: { g: GameState; index: number; name: (s: number) => string; onClose: () => void }) {
   const w = g.history[index];
+  // las novedades solo se pueden marcar sobre el estado actual si es la última guerra
+  const latest = index === g.history.length - 1;
   return (
     <div className="overlay soft" onClick={onClose}>
       <div className="summary framed" onClick={(e) => e.stopPropagation()}>
@@ -640,26 +629,22 @@ function WarSummary({ g, index, name, onClose }: { g: GameState; index: number; 
         <div className="sum-rows">
           {g.players.map((p, i) => {
             const ok = w.bids[i] === w.won[i];
-            const cards = w.changes ? acquired(p, w.changes[i]) : [];
             return (
               <div key={i} className={`sum-row ${ok ? 'hit' : 'miss'}`} style={{ ['--rc' as string]: REINO_INFO[p.reino].color }}>
-                <img className="sum-face" src={regenteImg(p.reino)} alt="" />
-                <div className="sum-name">
-                  <Rn r={p.reino}>{name(i)}</Rn>
-                  {w.emperor === i && ' ♛'}
+                <div className="sum-head">
+                  <img className="sum-face" src={regenteImg(p.reino)} alt="" />
+                  <div className="sum-name">
+                    <Rn r={p.reino}>{name(i)}</Rn>
+                    {w.emperor === i && ' ♛'}
+                  </div>
+                  <div className="sum-score" title="Ganadas / apuesta">
+                    <span className="num">
+                      {w.won[i]}/{w.bids[i]}
+                    </span>
+                    <b>{ok ? '✓' : '✗'}</b>
+                  </div>
                 </div>
-                <div className="sum-score" title="Ganadas / apuesta">
-                  <span className="pips">
-                    {Array.from({ length: Math.max(w.bids[i], w.won[i]) }, (_, k) => (
-                      <i key={k} className={k < w.won[i] ? (k < w.bids[i] ? 'on' : 'over') : 'off'} />
-                    ))}
-                    {w.bids[i] === 0 && w.won[i] === 0 && <i className="zero">0</i>}
-                  </span>
-                  <b>{ok ? '✓' : '✗'}</b>
-                </div>
-                <div className="sum-cards">
-                  {cards.length ? cards.map((c, k) => <img key={k} src={c.src} alt="" className={c.lost ? 'lost' : ''} />) : <span className="muted">—</span>}
-                </div>
+                <Lugares player={p} size="sm" cambios={latest ? w.changes?.[i] : undefined} />
               </div>
             );
           })}
@@ -696,7 +681,7 @@ function GameOver({ g, name, onExit }: { g: GameState; name: (s: number) => stri
         </p>
         <div className="ranking">
           {ranking.map(({ p, i }) => (
-            <div key={i} className="rank-row">
+            <div key={i} className="rank-row" style={{ ['--rc' as string]: REINO_INFO[p.reino].color }}>
               <span className="rank-name">
                 <Rn r={p.reino}>{name(i)}</Rn>
               </span>
