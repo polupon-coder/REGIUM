@@ -2498,3 +2498,158 @@ button.seal:hover:not(:disabled) {
     overflow: hidden;
   }
 }
+
+/* Ordenador: cabecera de cada reino compacta (retrato apaisado, nombre, y ⚔ y ♜ en una sola línea).
+   El campo de batalla tiene ancho fijo; con menos reinos las columnas son más anchas y los lugares
+   pasan a dos columnas, así se ven más grandes. */
+@media (min-width: 701px) {
+  .table {
+    --kz: min(52vw, calc(100vw - 680px));
+    --kw: calc((var(--kz) - (var(--np) - 1) * 10px) / var(--np));
+    grid-template-columns: minmax(0, 1fr) var(--kw) calc(var(--kz) - var(--kw) - 10px);
+  }
+  .rivals .seat,
+  .mine-head,
+  .my-lugares {
+    container-type: inline-size;
+  }
+  .seat-head,
+  .mine-head {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'face face'
+      'name name'
+      'bid city';
+    align-items: center;
+    justify-items: center;
+    row-gap: 2px;
+    column-gap: 4px;
+  }
+  .seat-info {
+    display: contents !important;
+  }
+  .seat-face,
+  .mine-head .mine-face {
+    grid-area: face;
+    width: 100% !important;
+    max-width: 150px !important;
+    aspect-ratio: 88 / 46;
+    object-fit: cover;
+    object-position: center 25%;
+  }
+  .seat-head .pname,
+  .mine-head .pname {
+    grid-area: name;
+  }
+  .seat-head .bidline,
+  .mine-head .bidline {
+    grid-area: bid;
+    justify-self: end;
+    font-size: 0.85rem;
+  }
+  .seat-head .cities,
+  .mine-head .cities {
+    grid-area: city;
+    justify-self: start;
+    font-size: 0.85rem;
+  }
+  .seat-head .cities b,
+  .mine-head .cities b {
+    font-size: 1rem !important;
+  }
+}
+/* columna ancha: los siete lugares en dos columnas (4 filas), más grandes */
+@container (min-width: 99999px) {
+  .lugares {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 701px) {
+  /* el retrato crece con la columna (menos reinos, más grande) sin quitar sitio a los lugares */
+  .seat-face,
+  .mine-head .mine-face {
+    max-width: none !important;
+    max-height: 17vh;
+  }
+  .seat .pname,
+  .mine-head .pname {
+    font-size: clamp(0.72rem, calc(var(--kw) / 12), 1.1rem) !important;
+  }
+  .seat-head .bidline,
+  .mine-head .bidline,
+  .seat-head .cities,
+  .mine-head .cities,
+  .seat-head .cities b,
+  .mine-head .cities b {
+    font-size: clamp(0.72rem, calc(var(--kw) / 12), 1.05rem) !important;
+  }
+}
+
+/* Con 4 reinos o menos: cabecera en horizontal (retrato a la izquierda, datos a la derecha),
+   así sobra altura y los lugares se ven más grandes */
+@media (min-width: 701px) {
+  .table:not([data-np='5']) .seat-head,
+  .table:not([data-np='5']) .mine-head {
+    grid-template-columns: 46% 1fr !important;
+    grid-template-areas:
+      'face name'
+      'face bid'
+      'face city' !important;
+    justify-items: start !important;
+    text-align: left;
+    column-gap: 8px !important;
+  }
+  .table:not([data-np='5']) .seat-face,
+  .table:not([data-np='5']) .mine-head .mine-face {
+    max-height: none;
+    aspect-ratio: 88 / 63;
+  }
+  .table:not([data-np='5']) .seat-head .bidline,
+  .table:not([data-np='5']) .mine-head .bidline,
+  .table:not([data-np='5']) .seat-head .cities,
+  .table:not([data-np='5']) .mine-head .cities {
+    justify-self: start !important;
+  }
+  .table:not([data-np='5']) .seat .pname,
+  .table:not([data-np='5']) .mine-head .pname {
+    white-space: normal;
+  }
+}
+@media (min-width: 701px) {
+  .table:not([data-np='5']) .seat-head,
+  .table:not([data-np='5']) .mine-head {
+    grid-template-columns: 46% auto 1fr !important;
+    grid-template-areas:
+      'face name name'
+      'face bid city' !important;
+    align-content: center;
+    overflow: visible !important;
+  }
+  .table:not([data-np='5']) .seat-head .cities,
+  .table:not([data-np='5']) .mine-head .cities {
+    margin-left: 6px;
+  }
+  .table:not([data-np='5']) .seat .pname,
+  .table:not([data-np='5']) .mine-head .pname {
+    align-self: end;
+  }
+  .table:not([data-np='5']) .seat-head .bidline,
+  .table:not([data-np='5']) .mine-head .bidline,
+  .table:not([data-np='5']) .seat-head .cities,
+  .table:not([data-np='5']) .mine-head .cities {
+    align-self: start;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 701px) {
+  .seat-face,
+  .mine-head .mine-face {
+    height: auto !important;
+  }
+  .mine-head {
+    padding: 6px !important;
+  }
+}
